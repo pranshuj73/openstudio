@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 import { useEditorStore } from '@/store/editorStore';
-import { getZoomAtTime } from '@/lib/editorUtils';
+import { getZoomForTime } from '@/lib/editorUtils';
 
 const W = 1280;
 const H = 720;
@@ -11,6 +11,7 @@ export default function PreviewCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const rafRef = useRef<number>(0);
+  const bgImageCache = useRef<Map<string, HTMLImageElement>>(new Map());
 
   const videoUrl = useEditorStore((s) => s.videoUrl);
   const isPlaying = useEditorStore((s) => s.isPlaying);
@@ -18,7 +19,21 @@ export default function PreviewCanvas() {
   const setCurrentTime = useEditorStore((s) => s.setCurrentTime);
   const setPlaying = useEditorStore((s) => s.setPlaying);
 
-  // Reads fresh state on every call — no stale closures
+  const getOrLoadBgImage = useCallback(
+    (url: string): HTMLImageElement | null => {
+      if (bgImageCache.current.has(url)) return bgImageCache.current.get(url)!;
+      const img = new Image();
+      img.onload = () => {
+        bgImageCache.current.set(url, img);
+        if (!useEditorStore.getState().isPlaying) renderFrame();
+      };
+      img.src = url;
+      return null;
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
   const renderFrame = useCallback(() => {
     const canvas = canvasRef.current;
     const video = videoRef.current;
@@ -38,25 +53,43 @@ export default function PreviewCanvas() {
     }
 
     // Background
-    if (clip.background.type === 'gradient' && clip.background.gradientTo) {
+    if (clip.background.type === 'image' && clip.background.imageUrl) {
+      const img = getOrLoadBgImage(clip.background.imageUrl);
+      if (img) {
+        const imgAR = img.naturalWidth / img.naturalHeight;
+        const canvasAR = W / H;
+        let sx = 0, sy = 0, sw = img.naturalWidth, sh = img.naturalHeight;
+        if (imgAR > canvasAR) {
+          sw = img.naturalHeight * canvasAR;
+          sx = (img.naturalWidth - sw) / 2;
+        } else {
+          sh = img.naturalWidth / canvasAR;
+          sy = (img.naturalHeight - sh) / 2;
+        }
+        ctx.drawImage(img, sx, sy, sw, sh, 0, 0, W, H);
+      } else {
+        ctx.fillStyle = '#111';
+        ctx.fillRect(0, 0, W, H);
+      }
+    } else if (clip.background.type === 'gradient' && clip.background.gradientTo) {
       const grad = ctx.createLinearGradient(0, 0, W, H);
       grad.addColorStop(0, clip.background.color);
       grad.addColorStop(1, clip.background.gradientTo);
       ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, W, H);
     } else {
       ctx.fillStyle = clip.background.color;
+      ctx.fillRect(0, 0, W, H);
     }
-    ctx.fillRect(0, 0, W, H);
 
     if (video.readyState < 2) return;
 
-    // Padded rect
+    // Padded draw rect
     const padX = (clip.padding / 100) * W;
     const padY = (clip.padding / 100) * H;
     const rectW = W - padX * 2;
     const rectH = H - padY * 2;
 
-    // Maintain video aspect ratio
     const videoAR = video.videoWidth / video.videoHeight || 16 / 9;
     const rectAR = rectW / rectH;
 
@@ -73,26 +106,31 @@ export default function PreviewCanvas() {
       drawY = padY;
     }
 
-    // Zoom interpolation
-    const zoom = getZoomAtTime(t, clip.zoomKeyframes);
+    const zoom = getZoomForTime(t, clip.zoomSegments);
+
     ctx.save();
-    const cx = drawX + drawW * zoom.x;
-    const cy = drawY + drawH * zoom.y;
+    // Clip to video rect so zoom never overflows into padding/background
+    ctx.beginPath();
+    ctx.rect(drawX, drawY, drawW, drawH);
+    ctx.clip();
+
+    // Apply zoom centered on video rect
+    const cx = drawX + drawW * 0.5;
+    const cy = drawY + drawH * 0.5;
     ctx.translate(cx, cy);
-    ctx.scale(zoom.scale, zoom.scale);
+    ctx.scale(zoom, zoom);
     ctx.translate(-cx, -cy);
     ctx.drawImage(video, drawX, drawY, drawW, drawH);
     ctx.restore();
 
-    // Frame overlay
+    // Frame overlay (drawn outside the clipping path)
     if (clip.frame.enabled) {
       ctx.strokeStyle = clip.frame.color;
       ctx.lineWidth = clip.frame.width;
       ctx.strokeRect(drawX, drawY, drawW, drawH);
     }
-  }, []);
+  }, [getOrLoadBgImage]);
 
-  // Play / pause video element
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !videoUrl) return;
@@ -103,7 +141,6 @@ export default function PreviewCanvas() {
     }
   }, [isPlaying, videoUrl]);
 
-  // Keep playback rate in sync with clip speed
   useEffect(() => {
     return useEditorStore.subscribe((state) => {
       const video = videoRef.current;
@@ -118,7 +155,6 @@ export default function PreviewCanvas() {
     });
   }, []);
 
-  // RAF loop while playing
   useEffect(() => {
     if (!isPlaying) {
       cancelAnimationFrame(rafRef.current);
@@ -140,7 +176,6 @@ export default function PreviewCanvas() {
     return () => cancelAnimationFrame(rafRef.current);
   }, [isPlaying, renderFrame, setCurrentTime, setPlaying]);
 
-  // Seek + render when scrubbing (paused)
   useEffect(() => {
     if (isPlaying) return;
     const video = videoRef.current;
@@ -153,7 +188,6 @@ export default function PreviewCanvas() {
     }
   }, [currentTime, isPlaying, renderFrame]);
 
-  // Re-render immediately when clip settings change (background, padding, etc.)
   useEffect(() => {
     let prev = useEditorStore.getState().clips;
     return useEditorStore.subscribe((state) => {

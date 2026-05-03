@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Clip, ZoomKeyframe } from '@/types/editor';
+import type { Clip, ZoomSegment } from '@/types/editor';
 
 interface EditorStore {
   videoFile: File | null;
@@ -11,6 +11,7 @@ interface EditorStore {
   isPlaying: boolean;
   clips: Clip[];
   selectedClipId: string | null;
+  thumbnails: string[];
 
   loadVideo: (file: File, duration: number, w: number, h: number) => void;
   setCurrentTime: (time: number) => void;
@@ -18,12 +19,13 @@ interface EditorStore {
   selectClip: (id: string | null) => void;
   updateClip: (id: string, updates: Partial<Omit<Clip, 'id'>>) => void;
   splitAtTime: (time: number) => void;
-  addZoomKeyframe: (clipId: string, kf: Omit<ZoomKeyframe, 'id'>) => void;
-  removeZoomKeyframe: (clipId: string, kfId: string) => void;
-  updateZoomKeyframe: (
+  setThumbnails: (thumbs: string[]) => void;
+  addZoomSegment: (clipId: string, seg: Omit<ZoomSegment, 'id'>) => void;
+  removeZoomSegment: (clipId: string, segId: string) => void;
+  updateZoomSegment: (
     clipId: string,
-    kfId: string,
-    updates: Partial<Omit<ZoomKeyframe, 'id'>>
+    segId: string,
+    updates: Partial<Omit<ZoomSegment, 'id'>>
   ) => void;
 }
 
@@ -37,6 +39,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   isPlaying: false,
   clips: [],
   selectedClipId: null,
+  thumbnails: [],
 
   loadVideo: (file, duration, w, h) => {
     const old = get().videoUrl;
@@ -50,7 +53,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
       background: { type: 'color', color: '#111111' },
       padding: 8,
       frame: { enabled: false, color: '#ffffff', width: 2 },
-      zoomKeyframes: [],
+      zoomSegments: [],
     };
     set({
       videoFile: file,
@@ -62,12 +65,14 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
       selectedClipId: clip.id,
       currentTime: 0,
       isPlaying: false,
+      thumbnails: [],
     });
   },
 
   setCurrentTime: (time) => set({ currentTime: time }),
   setPlaying: (playing) => set({ isPlaying: playing }),
   selectClip: (id) => set({ selectedClipId: id }),
+  setThumbnails: (thumbs) => set({ thumbnails: thumbs }),
 
   updateClip: (id, updates) =>
     set((s) => ({
@@ -85,54 +90,55 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
       ...orig,
       id: crypto.randomUUID(),
       sourceEnd: time,
-      zoomKeyframes: orig.zoomKeyframes.filter((kf) => kf.time < time),
+      zoomSegments: orig.zoomSegments
+        .filter((s) => s.startTime < time)
+        .map((s) => ({ ...s, endTime: Math.min(s.endTime, time) })),
     };
     const b: Clip = {
       ...orig,
       id: crypto.randomUUID(),
       sourceStart: time,
-      zoomKeyframes: orig.zoomKeyframes.filter((kf) => kf.time >= time),
+      zoomSegments: orig.zoomSegments
+        .filter((s) => s.endTime > time)
+        .map((s) => ({ ...s, startTime: Math.max(s.startTime, time) })),
     };
     const next = [...clips];
     next.splice(idx, 1, a, b);
     set({ clips: next, selectedClipId: a.id });
   },
 
-  addZoomKeyframe: (clipId, kf) =>
+  addZoomSegment: (clipId, seg) =>
     set((s) => ({
       clips: s.clips.map((c) =>
         c.id === clipId
           ? {
               ...c,
-              zoomKeyframes: [
-                ...c.zoomKeyframes,
-                { ...kf, id: crypto.randomUUID() },
-              ].sort((a, b) => a.time - b.time),
+              zoomSegments: [
+                ...c.zoomSegments,
+                { ...seg, id: crypto.randomUUID() },
+              ].sort((a, b) => a.startTime - b.startTime),
             }
           : c
       ),
     })),
 
-  removeZoomKeyframe: (clipId, kfId) =>
+  removeZoomSegment: (clipId, segId) =>
     set((s) => ({
       clips: s.clips.map((c) =>
         c.id === clipId
-          ? {
-              ...c,
-              zoomKeyframes: c.zoomKeyframes.filter((kf) => kf.id !== kfId),
-            }
+          ? { ...c, zoomSegments: c.zoomSegments.filter((s) => s.id !== segId) }
           : c
       ),
     })),
 
-  updateZoomKeyframe: (clipId, kfId, updates) =>
+  updateZoomSegment: (clipId, segId, updates) =>
     set((s) => ({
       clips: s.clips.map((c) =>
         c.id === clipId
           ? {
               ...c,
-              zoomKeyframes: c.zoomKeyframes.map((kf) =>
-                kf.id === kfId ? { ...kf, ...updates } : kf
+              zoomSegments: c.zoomSegments.map((s) =>
+                s.id === segId ? { ...s, ...updates } : s
               ),
             }
           : c

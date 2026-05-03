@@ -4,17 +4,55 @@ import { useRef } from 'react';
 import { Upload } from 'lucide-react';
 import { useEditorStore } from '@/store/editorStore';
 
+async function generateThumbnails(url: string, duration: number, count = 20): Promise<string[]> {
+  return new Promise((resolve) => {
+    const video = document.createElement('video');
+    video.src = url;
+    video.muted = true;
+    video.preload = 'auto';
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 160;
+    canvas.height = 90;
+    const ctx = canvas.getContext('2d')!;
+    const thumbs: string[] = [];
+    let i = 0;
+
+    const seekNext = () => {
+      if (i >= count) {
+        resolve(thumbs);
+        return;
+      }
+      video.currentTime = (i / (count - 1)) * duration;
+      i++;
+    };
+
+    video.onseeked = () => {
+      ctx.drawImage(video, 0, 0, 160, 90);
+      thumbs.push(canvas.toDataURL('image/jpeg', 0.5));
+      seekNext();
+    };
+
+    video.onloadeddata = () => seekNext();
+    video.load();
+  });
+}
+
 export default function UploadZone() {
   const inputRef = useRef<HTMLInputElement>(null);
   const loadVideo = useEditorStore((s) => s.loadVideo);
+  const setThumbnails = useEditorStore((s) => s.setThumbnails);
 
   const handleFile = (file: File) => {
     const tempUrl = URL.createObjectURL(file);
     const vid = document.createElement('video');
     vid.src = tempUrl;
-    vid.onloadedmetadata = () => {
+    vid.onloadedmetadata = async () => {
       loadVideo(file, vid.duration, vid.videoWidth, vid.videoHeight);
+      const storeUrl = useEditorStore.getState().videoUrl!;
       URL.revokeObjectURL(tempUrl);
+      const thumbs = await generateThumbnails(storeUrl, vid.duration);
+      setThumbnails(thumbs);
     };
   };
 

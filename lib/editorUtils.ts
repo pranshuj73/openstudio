@@ -1,41 +1,26 @@
-import type { ZoomKeyframe } from '@/types/editor';
-
-function lerp(a: number, b: number, t: number) {
-  return a + (b - a) * t;
-}
+import type { ZoomSegment } from '@/types/editor';
 
 function easeInOut(t: number) {
   return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 }
 
-export function getZoomAtTime(
-  time: number,
-  keyframes: ZoomKeyframe[]
-): { scale: number; x: number; y: number } {
-  if (keyframes.length === 0) return { scale: 1, x: 0.5, y: 0.5 };
+export function getZoomForTime(time: number, segments: ZoomSegment[]): number {
+  const seg = segments.find((s) => time >= s.startTime && time <= s.endTime);
+  if (!seg) return 1;
 
-  const sorted = [...keyframes].sort((a, b) => a.time - b.time);
+  const duration = seg.endTime - seg.startTime;
+  if (duration <= 0) return seg.scale;
 
-  if (time <= sorted[0].time)
-    return { scale: sorted[0].scale, x: sorted[0].x, y: sorted[0].y };
+  const easeTime = Math.min(duration * 0.25, 0.5);
+  const elapsed = time - seg.startTime;
 
-  const last = sorted[sorted.length - 1];
-  if (time >= last.time) return { scale: last.scale, x: last.x, y: last.y };
-
-  for (let i = 0; i < sorted.length - 1; i++) {
-    if (time >= sorted[i].time && time <= sorted[i + 1].time) {
-      const t = easeInOut(
-        (time - sorted[i].time) / (sorted[i + 1].time - sorted[i].time)
-      );
-      return {
-        scale: lerp(sorted[i].scale, sorted[i + 1].scale, t),
-        x: lerp(sorted[i].x, sorted[i + 1].x, t),
-        y: lerp(sorted[i].y, sorted[i + 1].y, t),
-      };
-    }
+  if (elapsed < easeTime) {
+    return 1 + (seg.scale - 1) * easeInOut(elapsed / easeTime);
   }
-
-  return { scale: 1, x: 0.5, y: 0.5 };
+  if (elapsed > duration - easeTime) {
+    return 1 + (seg.scale - 1) * easeInOut((duration - elapsed) / easeTime);
+  }
+  return seg.scale;
 }
 
 export function formatTime(seconds: number): string {

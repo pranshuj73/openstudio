@@ -1,30 +1,30 @@
-export interface ZoomKeyframe {
+export interface ZoomSegment {
   id: string;
-  time: number; // absolute video time in seconds
-  scale: number; // 1.0 = no zoom
-  x: number; // 0–1 normalized focus point
-  y: number; // 0–1 normalized focus point
+  startTime: number;
+  endTime: number;
+  scale: number;
 }
 
 export interface Background {
-  type: 'color' | 'gradient';
+  type: 'color' | 'gradient' | 'image';
   color: string;
   gradientTo?: string;
+  imageUrl?: string;
 }
 
 export interface Frame {
   enabled: boolean;
   color: string;
-  width: number; // px at 1280×720
+  width: number;
 }
 
 export interface Clip {
   id: string;
-  sourceStart: number; // seconds in source video
+  sourceStart: number;
   sourceEnd: number;
-  speed: number; // 1 = normal
+  speed: number;
   background: Background;
-  padding: number; // 0–20 percent
+  padding: number;
   frame: Frame;
-  zoomKeyframes: ZoomKeyframe[];
+  zoomSegments: ZoomSegment[];
 }
