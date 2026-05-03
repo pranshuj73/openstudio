@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Clip, ZoomSegment } from '@/types/editor';
+import type { Clip, ZoomSegment, PanKeyframe } from '@/types/editor';
 
 interface EditorStore {
   videoFile: File | null;
@@ -20,13 +20,16 @@ interface EditorStore {
   updateClip: (id: string, updates: Partial<Omit<Clip, 'id'>>) => void;
   splitAtTime: (time: number) => void;
   setThumbnails: (thumbs: string[]) => void;
-  addZoomSegment: (clipId: string, seg: Omit<ZoomSegment, 'id'>) => void;
+
+  // Zoom segments
+  addZoomSegment: (clipId: string, seg: Omit<ZoomSegment, 'id' | 'panKeyframes'>) => void;
   removeZoomSegment: (clipId: string, segId: string) => void;
-  updateZoomSegment: (
-    clipId: string,
-    segId: string,
-    updates: Partial<Omit<ZoomSegment, 'id'>>
-  ) => void;
+  updateZoomSegment: (clipId: string, segId: string, updates: Partial<Omit<ZoomSegment, 'id' | 'panKeyframes'>>) => void;
+
+  // Pan keyframes
+  addPanKeyframe: (clipId: string, segId: string, kf: Omit<PanKeyframe, 'id'>) => void;
+  removePanKeyframe: (clipId: string, segId: string, kfId: string) => void;
+  updatePanKeyframe: (clipId: string, segId: string, kfId: string, updates: Partial<Omit<PanKeyframe, 'id'>>) => void;
 }
 
 export const useEditorStore = create<EditorStore>((set, get) => ({
@@ -92,7 +95,11 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
       sourceEnd: time,
       zoomSegments: orig.zoomSegments
         .filter((s) => s.startTime < time)
-        .map((s) => ({ ...s, endTime: Math.min(s.endTime, time) })),
+        .map((s) => ({
+          ...s,
+          endTime: Math.min(s.endTime, time),
+          panKeyframes: s.panKeyframes.filter((kf) => kf.time <= time),
+        })),
     };
     const b: Clip = {
       ...orig,
@@ -100,7 +107,11 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
       sourceStart: time,
       zoomSegments: orig.zoomSegments
         .filter((s) => s.endTime > time)
-        .map((s) => ({ ...s, startTime: Math.max(s.startTime, time) })),
+        .map((s) => ({
+          ...s,
+          startTime: Math.max(s.startTime, time),
+          panKeyframes: s.panKeyframes.filter((kf) => kf.time >= time),
+        })),
     };
     const next = [...clips];
     next.splice(idx, 1, a, b);
@@ -115,7 +126,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
               ...c,
               zoomSegments: [
                 ...c.zoomSegments,
-                { ...seg, id: crypto.randomUUID() },
+                { ...seg, id: crypto.randomUUID(), panKeyframes: [] },
               ].sort((a, b) => a.startTime - b.startTime),
             }
           : c
@@ -139,6 +150,68 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
               ...c,
               zoomSegments: c.zoomSegments.map((s) =>
                 s.id === segId ? { ...s, ...updates } : s
+              ),
+            }
+          : c
+      ),
+    })),
+
+  addPanKeyframe: (clipId, segId, kf) =>
+    set((s) => ({
+      clips: s.clips.map((c) =>
+        c.id === clipId
+          ? {
+              ...c,
+              zoomSegments: c.zoomSegments.map((seg) =>
+                seg.id === segId
+                  ? {
+                      ...seg,
+                      panKeyframes: [
+                        ...seg.panKeyframes,
+                        { ...kf, id: crypto.randomUUID() },
+                      ].sort((a, b) => a.time - b.time),
+                    }
+                  : seg
+              ),
+            }
+          : c
+      ),
+    })),
+
+  removePanKeyframe: (clipId, segId, kfId) =>
+    set((s) => ({
+      clips: s.clips.map((c) =>
+        c.id === clipId
+          ? {
+              ...c,
+              zoomSegments: c.zoomSegments.map((seg) =>
+                seg.id === segId
+                  ? {
+                      ...seg,
+                      panKeyframes: seg.panKeyframes.filter((kf) => kf.id !== kfId),
+                    }
+                  : seg
+              ),
+            }
+          : c
+      ),
+    })),
+
+  updatePanKeyframe: (clipId, segId, kfId, updates) =>
+    set((s) => ({
+      clips: s.clips.map((c) =>
+        c.id === clipId
+          ? {
+              ...c,
+              zoomSegments: c.zoomSegments.map((seg) =>
+                seg.id === segId
+                  ? {
+                      ...seg,
+                      panKeyframes: seg.panKeyframes.map((kf) =>
+                        kf.id === kfId ? { ...kf, ...updates } : kf
+                      ),
+                    }
+                  : seg
               ),
             }
           : c

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 import { useEditorStore } from '@/store/editorStore';
-import { getZoomForTime } from '@/lib/editorUtils';
+import { getZoomForTime, getPanForTime } from '@/lib/editorUtils';
 
 const W = 1280;
 const H = 720;
@@ -106,7 +106,9 @@ export default function PreviewCanvas() {
       drawY = padY;
     }
 
+    const activeSeg = clip.zoomSegments.find((s) => t >= s.startTime && t <= s.endTime);
     const zoom = getZoomForTime(t, clip.zoomSegments);
+    const pan = activeSeg ? getPanForTime(t, activeSeg.panKeyframes) : { x: 0.5, y: 0.5 };
 
     ctx.save();
     // Clip to video rect so zoom never overflows into padding/background
@@ -114,9 +116,8 @@ export default function PreviewCanvas() {
     ctx.rect(drawX, drawY, drawW, drawH);
     ctx.clip();
 
-    // Apply zoom centered on video rect
-    const cx = drawX + drawW * 0.5;
-    const cy = drawY + drawH * 0.5;
+    const cx = drawX + drawW * pan.x;
+    const cy = drawY + drawH * pan.y;
     ctx.translate(cx, cy);
     ctx.scale(zoom, zoom);
     ctx.translate(-cx, -cy);

@@ -1,8 +1,16 @@
+export interface PanKeyframe {
+  id: string;
+  time: number;
+  x: number; // 0–1: normalized horizontal center of frame
+  y: number; // 0–1: normalized vertical center of frame
+}
+
 export interface ZoomSegment {
   id: string;
   startTime: number;
   endTime: number;
   scale: number;
+  panKeyframes: PanKeyframe[];
 }
 
 export interface Background {
