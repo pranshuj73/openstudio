@@ -1,6 +1,6 @@
 'use client';
 
-import { Play, Pause, Scissors, Download } from 'lucide-react';
+import { Play, Pause, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useEditorStore } from '@/store/editorStore';
 import { formatTime } from '@/lib/editorUtils';
@@ -10,7 +10,6 @@ export default function Toolbar() {
   const setPlaying = useEditorStore((s) => s.setPlaying);
   const currentTime = useEditorStore((s) => s.currentTime);
   const videoDuration = useEditorStore((s) => s.videoDuration);
-  const splitAtTime = useEditorStore((s) => s.splitAtTime);
   const videoUrl = useEditorStore((s) => s.videoUrl);
 
   return (
@@ -39,21 +38,7 @@ export default function Toolbar() {
       </div>
 
       <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          className="h-7 text-xs gap-1.5 font-mono"
-          disabled={!videoUrl}
-          onClick={() => splitAtTime(currentTime)}
-        >
-          <Scissors className="w-3 h-3" />
-          cut
-        </Button>
-        <Button
-          size="sm"
-          className="h-7 text-xs gap-1.5 font-mono"
-          disabled
-        >
+        <Button size="sm" className="h-7 text-xs gap-1.5 font-mono" disabled>
           <Download className="w-3 h-3" />
           export
         </Button>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useRef, useState } from 'react';
-import { ZoomIn, X } from 'lucide-react';
+import { ZoomIn, X, Scissors } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { useEditorStore } from '@/store/editorStore';
@@ -25,6 +25,7 @@ export default function Timeline() {
   const setCurrentTime = useEditorStore((s) => s.setCurrentTime);
   const setPlaying = useEditorStore((s) => s.setPlaying);
   const selectClip = useEditorStore((s) => s.selectClip);
+  const splitAtTime = useEditorStore((s) => s.splitAtTime);
   const addZoomSegment = useEditorStore((s) => s.addZoomSegment);
   const removeZoomSegment = useEditorStore((s) => s.removeZoomSegment);
   const updateZoomSegment = useEditorStore((s) => s.updateZoomSegment);
@@ -135,25 +136,36 @@ export default function Timeline() {
     currentTime <= activeSeg.endTime;
 
   return (
-    <div className="bg-background border-t border-border shrink-0 flex flex-col select-none" style={{ height: 176 }}>
+    <div className="bg-background border-t border-border shrink-0 flex flex-col select-none" style={{ height: 232 }}>
 
-      {/* Zoom row header (zoom button + count) */}
-      <div className="h-7 border-b border-border flex items-center px-2 gap-2 shrink-0">
+      {/* Tool panel */}
+      <div className="h-10 border-b border-border flex items-center px-3 gap-1.5 shrink-0">
         <Button
-          variant="ghost"
+          variant="outline"
           size="sm"
-          className="h-5 text-[10px] gap-1 font-mono px-2"
+          className="h-7 text-xs gap-1.5 font-mono"
+          disabled={!videoDuration}
+          onClick={() => splitAtTime(currentTime)}
+        >
+          <Scissors className="w-3 h-3" />
+          cut
+        </Button>
+        <div className="w-px h-5 bg-border mx-1" />
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-7 text-xs gap-1.5 font-mono"
           disabled={!selectedClip}
           onClick={addZoomAtPlayhead}
         >
           <ZoomIn className="w-3 h-3" />
           zoom
         </Button>
-        <span className="font-mono text-[9px] text-muted-foreground/40">
-          {selectedClip
-            ? `${selectedClip.zoomSegments.length} region${selectedClip.zoomSegments.length !== 1 ? 's' : ''}`
-            : 'select a clip'}
-        </span>
+        {selectedClip && selectedClip.zoomSegments.length > 0 && (
+          <span className="font-mono text-[9px] text-muted-foreground/50 ml-1">
+            {selectedClip.zoomSegments.length} region{selectedClip.zoomSegments.length !== 1 ? 's' : ''}
+          </span>
+        )}
       </div>
 
       {/* Zoom segment settings (shown when a segment is active) */}
@@ -267,7 +279,7 @@ export default function Timeline() {
         </div>
 
         {/* Clip track */}
-        <div className="relative" style={{ height: 56 }}>
+        <div className="relative" style={{ height: 80 }}>
           {/* Clip blocks */}
           {clips.map((clip, i) => {
             if (!videoDuration) return null;
