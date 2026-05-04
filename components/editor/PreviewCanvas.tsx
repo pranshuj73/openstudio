@@ -135,14 +135,12 @@ export default function PreviewCanvas() {
       ctx.globalAlpha = clip.frame.opacity ?? 1;
       ctx.strokeStyle = clip.frame.color;
       ctx.lineWidth = clip.frame.width;
+      // Expand outward by half lineWidth so the inner edge is flush with the video
+      const hw = clip.frame.width / 2;
       const r = clip.frame.radius ?? 0;
-      if (r > 0) {
-        ctx.beginPath();
-        ctx.roundRect(drawX, drawY, drawW, drawH, r);
-        ctx.stroke();
-      } else {
-        ctx.strokeRect(drawX, drawY, drawW, drawH);
-      }
+      ctx.beginPath();
+      ctx.roundRect(drawX - hw, drawY - hw, drawW + hw * 2, drawH + hw * 2, r > 0 ? r + hw : 0);
+      ctx.stroke();
       ctx.restore();
     }
   }, [getOrLoadBgImage]);
