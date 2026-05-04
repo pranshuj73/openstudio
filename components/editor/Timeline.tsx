@@ -1,9 +1,8 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
-import { ZoomIn, X, Scissors } from 'lucide-react';
+import { useCallback, useRef } from 'react';
+import { ZoomIn, Scissors } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
 import { useEditorStore } from '@/store/editorStore';
 import { formatTime } from '@/lib/editorUtils';
 import type { ZoomSegment } from '@/types/editor';
@@ -14,34 +13,28 @@ type DragState =
   | { type: 'left'; segId: string; clipId: string; startX: number; origStart: number; origEnd: number }
   | { type: 'right'; segId: string; clipId: string; startX: number; origStart: number; origEnd: number };
 
-const SCALE_PRESETS = [1.5, 2, 2.5, 3];
-
 export default function Timeline() {
   const currentTime = useEditorStore((s) => s.currentTime);
   const videoDuration = useEditorStore((s) => s.videoDuration);
   const clips = useEditorStore((s) => s.clips);
   const selectedClipId = useEditorStore((s) => s.selectedClipId);
   const thumbnails = useEditorStore((s) => s.thumbnails);
+  const sidebarPanel = useEditorStore((s) => s.sidebarPanel);
   const setCurrentTime = useEditorStore((s) => s.setCurrentTime);
   const setPlaying = useEditorStore((s) => s.setPlaying);
   const selectClip = useEditorStore((s) => s.selectClip);
   const splitAtTime = useEditorStore((s) => s.splitAtTime);
   const addZoomSegment = useEditorStore((s) => s.addZoomSegment);
-  const removeZoomSegment = useEditorStore((s) => s.removeZoomSegment);
   const updateZoomSegment = useEditorStore((s) => s.updateZoomSegment);
-  const addPanKeyframe = useEditorStore((s) => s.addPanKeyframe);
-  const removePanKeyframe = useEditorStore((s) => s.removePanKeyframe);
-  const updatePanKeyframe = useEditorStore((s) => s.updatePanKeyframe);
+  const setSidebarPanel = useEditorStore((s) => s.setSidebarPanel);
 
-  // trackRef is used for both scrubbing AND zoom segment time calculations
   const trackRef = useRef<HTMLDivElement>(null);
   const isScrubbing = useRef(false);
   const dragRef = useRef<DragState>({ type: 'none' });
-  const [activeSegId, setActiveSegId] = useState<string | null>(null);
 
   const selectedClip = clips.find((c) => c.id === selectedClipId);
+  const activeSegId = sidebarPanel.type === 'zoom' ? sidebarPanel.segId : null;
 
-  // --- Scrub ---
   const timeFromPointer = useCallback(
     (clientX: number) => {
       if (!trackRef.current || !videoDuration) return null;
@@ -65,7 +58,6 @@ export default function Timeline() {
     [timeFromPointer, setCurrentTime, selectClip]
   );
 
-  // --- Zoom segment drag ---
   const startSegDrag = (
     e: React.PointerEvent,
     seg: ZoomSegment,
@@ -79,16 +71,13 @@ export default function Timeline() {
 
   const handleTrackPointerMove = (e: React.PointerEvent) => {
     const drag = dragRef.current;
-
     if (drag.type !== 'none') {
-      // Zoom segment drag takes priority
       const tNow = timeFromPointer(e.clientX);
       const tStart = timeFromPointer(drag.startX);
       if (tNow === null || tStart === null) return;
       const dt = tNow - tStart;
       const clip = useEditorStore.getState().clips.find((c) => c.id === drag.clipId);
       if (!clip) return;
-
       if (drag.type === 'move') {
         const dur = drag.origEnd - drag.origStart;
         const ns = Math.max(clip.sourceStart, Math.min(drag.origStart + dt, clip.sourceEnd - dur));
@@ -103,11 +92,6 @@ export default function Timeline() {
     } else if (isScrubbing.current) {
       applySeek(e.clientX);
     }
-  };
-
-  const handleTrackPointerUp = () => {
-    dragRef.current = { type: 'none' };
-    isScrubbing.current = false;
   };
 
   const addZoomAtPlayhead = () => {
@@ -128,12 +112,6 @@ export default function Timeline() {
 
   const pct = (t: number) => `${(t / videoDuration) * 100}%`;
   const playheadPct = videoDuration ? (currentTime / videoDuration) * 100 : 0;
-
-  const activeSeg = selectedClip?.zoomSegments.find((s) => s.id === activeSegId);
-  const inActiveSeg =
-    activeSeg !== undefined &&
-    currentTime >= activeSeg.startTime &&
-    currentTime <= activeSeg.endTime;
 
   return (
     <div className="bg-background border-t border-border shrink-0 flex flex-col select-none" style={{ height: 232 }}>
@@ -168,96 +146,11 @@ export default function Timeline() {
         )}
       </div>
 
-      {/* Zoom segment settings (shown when a segment is active) */}
-      {activeSeg && selectedClip && (
-        <div className="border-b border-border bg-muted/10 shrink-0 px-3 py-2 space-y-2">
-          {/* Scale row */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-mono text-[9px] text-muted-foreground/50 shrink-0">
-              {formatTime(activeSeg.startTime)} → {formatTime(activeSeg.endTime)}
-            </span>
-            <div className="flex gap-1">
-              {SCALE_PRESETS.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => updateZoomSegment(selectedClip.id, activeSeg.id, { scale: s })}
-                  className={`font-mono text-[9px] px-1.5 py-0.5 border ${
-                    activeSeg.scale === s
-                      ? 'bg-foreground text-background border-foreground'
-                      : 'border-border text-muted-foreground hover:border-foreground/40'
-                  }`}
-                >
-                  {s}x
-                </button>
-              ))}
-            </div>
-            <div className="flex items-center gap-1.5 flex-1 min-w-24 max-w-36">
-              <Slider
-                min={1.1} max={4} step={0.1}
-                value={[activeSeg.scale]}
-                onValueChange={([v]) => updateZoomSegment(selectedClip.id, activeSeg.id, { scale: +v.toFixed(1) })}
-              />
-              <span className="font-mono text-[9px] text-muted-foreground w-6 shrink-0">{activeSeg.scale.toFixed(1)}x</span>
-            </div>
-            <button
-              onClick={() => updateZoomSegment(selectedClip.id, activeSeg.id, { startTime: selectedClip.sourceStart, endTime: selectedClip.sourceEnd })}
-              className="font-mono text-[9px] px-2 py-0.5 border border-border text-muted-foreground hover:border-foreground/40"
-            >
-              throughout
-            </button>
-            <Button variant="ghost" size="icon" className="w-5 h-5 ml-auto shrink-0"
-              onClick={() => { removeZoomSegment(selectedClip.id, activeSeg.id); setActiveSegId(null); }}>
-              <X className="w-3 h-3" />
-            </Button>
-          </div>
-
-          {/* Pan keyframes */}
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-[9px] text-muted-foreground/40 uppercase tracking-wider">camera path</span>
-              <button
-                disabled={!inActiveSeg}
-                onClick={() => addPanKeyframe(selectedClip.id, activeSeg.id, { time: currentTime, x: 0.5, y: 0.5 })}
-                className="ml-auto font-mono text-[9px] px-2 py-0.5 border border-border text-muted-foreground hover:border-foreground/40 disabled:opacity-30"
-              >
-                + kf at playhead
-              </button>
-            </div>
-            {activeSeg.panKeyframes.length === 0 ? (
-              <p className="font-mono text-[9px] text-muted-foreground/30">
-                add keyframes to animate camera position while zoomed in
-              </p>
-            ) : (
-              activeSeg.panKeyframes.map((kf) => (
-                <div key={kf.id} className="flex items-center gap-1.5">
-                  <span className="font-mono text-[8px] text-muted-foreground/50 w-10 shrink-0">{formatTime(kf.time)}</span>
-                  <span className="font-mono text-[8px] text-muted-foreground/50">x</span>
-                  <Slider min={0} max={1} step={0.01} value={[kf.x]}
-                    onValueChange={([v]) => updatePanKeyframe(selectedClip.id, activeSeg.id, kf.id, { x: v })}
-                    className="flex-1" />
-                  <span className="font-mono text-[8px] text-muted-foreground/50 w-6 text-right">{kf.x.toFixed(2)}</span>
-                  <span className="font-mono text-[8px] text-muted-foreground/50">y</span>
-                  <Slider min={0} max={1} step={0.01} value={[kf.y]}
-                    onValueChange={([v]) => updatePanKeyframe(selectedClip.id, activeSeg.id, kf.id, { y: v })}
-                    className="flex-1" />
-                  <span className="font-mono text-[8px] text-muted-foreground/50 w-6 text-right">{kf.y.toFixed(2)}</span>
-                  <Button variant="ghost" size="icon" className="w-4 h-4 shrink-0"
-                    onClick={() => removePanKeyframe(selectedClip.id, activeSeg.id, kf.id)}>
-                    <X className="w-2.5 h-2.5" />
-                  </Button>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Scrub area: ruler + clip track (zoom segments overlay here) */}
+      {/* Scrub area: ruler + clip track */}
       <div
         ref={trackRef}
         className="relative flex-1 cursor-col-resize overflow-hidden"
         onPointerDown={(e) => {
-          // Only start scrubbing if we didn't hit a zoom segment
           if (dragRef.current.type === 'none') {
             isScrubbing.current = true;
             setPlaying(false);
@@ -266,7 +159,7 @@ export default function Timeline() {
           }
         }}
         onPointerMove={handleTrackPointerMove}
-        onPointerUp={handleTrackPointerUp}
+        onPointerUp={() => { dragRef.current = { type: 'none' }; isScrubbing.current = false; }}
       >
         {/* Ruler */}
         <div className="h-5 border-b border-border relative pointer-events-none">
@@ -306,27 +199,28 @@ export default function Timeline() {
             );
           })}
 
-          {/* Zoom segments — translucent blue overlays on top of clips */}
+          {/* Zoom segment overlays */}
           {selectedClip?.zoomSegments.map((seg) => {
             const isActive = activeSegId === seg.id;
-            const left = pct(seg.startTime);
-            const width = `${((seg.endTime - seg.startTime) / videoDuration) * 100}%`;
             return (
               <div
                 key={seg.id}
-                className={`absolute top-1 bottom-1 z-10 cursor-grab active:cursor-grabbing overflow-hidden transition-colors group ${
+                className={`absolute top-1 bottom-1 z-10 cursor-grab active:cursor-grabbing overflow-hidden transition-colors ${
                   isActive
                     ? 'bg-blue-500/35 border border-blue-400/70'
                     : 'bg-blue-500/15 border border-blue-500/35 hover:bg-blue-500/28 hover:border-blue-400/55'
                 }`}
-                style={{ left, width }}
-                onClick={() => setActiveSegId(isActive ? null : seg.id)}
+                style={{ left: pct(seg.startTime), width: `${((seg.endTime - seg.startTime) / videoDuration) * 100}%` }}
+                onClick={() => {
+                  setSidebarPanel(
+                    isActive ? { type: 'clip' } : { type: 'zoom', segId: seg.id }
+                  );
+                }}
                 onPointerDown={(e) => {
-                  setActiveSegId(seg.id);
+                  setSidebarPanel({ type: 'zoom', segId: seg.id });
                   startSegDrag(e, seg, selectedClip.id, 'move');
                 }}
               >
-                {/* Left resize handle */}
                 <div
                   className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-blue-300/20"
                   onPointerDown={(e) => { e.stopPropagation(); startSegDrag(e, seg, selectedClip.id, 'left'); }}
@@ -334,7 +228,6 @@ export default function Timeline() {
                 <span className="absolute inset-0 flex items-center justify-center font-mono text-[8px] text-blue-200/70 pointer-events-none">
                   {seg.scale}x
                 </span>
-                {/* Pan keyframe tick marks */}
                 {seg.panKeyframes.map((kf) => (
                   <div
                     key={kf.id}
@@ -342,7 +235,6 @@ export default function Timeline() {
                     style={{ left: `${((kf.time - seg.startTime) / (seg.endTime - seg.startTime)) * 100}%` }}
                   />
                 ))}
-                {/* Right resize handle */}
                 <div
                   className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-blue-300/20"
                   onPointerDown={(e) => { e.stopPropagation(); startSegDrag(e, seg, selectedClip.id, 'right'); }}

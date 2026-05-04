@@ -1,6 +1,10 @@
 import { create } from 'zustand';
 import type { Clip, ZoomSegment, PanKeyframe } from '@/types/editor';
 
+export type SidebarPanel =
+  | { type: 'clip' }
+  | { type: 'zoom'; segId: string };
+
 interface EditorStore {
   videoFile: File | null;
   videoUrl: string | null;
@@ -12,6 +16,7 @@ interface EditorStore {
   clips: Clip[];
   selectedClipId: string | null;
   thumbnails: string[];
+  sidebarPanel: SidebarPanel;
 
   loadVideo: (file: File, duration: number, w: number, h: number) => void;
   setCurrentTime: (time: number) => void;
@@ -20,6 +25,7 @@ interface EditorStore {
   updateClip: (id: string, updates: Partial<Omit<Clip, 'id'>>) => void;
   splitAtTime: (time: number) => void;
   setThumbnails: (thumbs: string[]) => void;
+  setSidebarPanel: (panel: SidebarPanel) => void;
 
   // Zoom segments
   addZoomSegment: (clipId: string, seg: Omit<ZoomSegment, 'id' | 'panKeyframes'>) => void;
@@ -43,6 +49,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   clips: [],
   selectedClipId: null,
   thumbnails: [],
+  sidebarPanel: { type: 'clip' },
 
   loadVideo: (file, duration, w, h) => {
     const old = get().videoUrl;
@@ -69,6 +76,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
       currentTime: 0,
       isPlaying: false,
       thumbnails: [],
+      sidebarPanel: { type: 'clip' },
     });
   },
 
@@ -76,6 +84,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   setPlaying: (playing) => set({ isPlaying: playing }),
   selectClip: (id) => set({ selectedClipId: id }),
   setThumbnails: (thumbs) => set({ thumbnails: thumbs }),
+  setSidebarPanel: (panel) => set({ sidebarPanel: panel }),
 
   updateClip: (id, updates) =>
     set((s) => ({
