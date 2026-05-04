@@ -1,6 +1,6 @@
 'use client';
 
-import { Play, Pause, Download } from 'lucide-react';
+import { Play, Pause, Download, Expand } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useEditorStore } from '@/store/editorStore';
 import { formatTime } from '@/lib/editorUtils';
@@ -38,6 +38,15 @@ export default function Toolbar() {
       </div>
 
       <div className="flex items-center gap-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="w-7 h-7"
+          disabled={!videoUrl}
+          onClick={() => document.getElementById('preview-area')?.requestFullscreen()}
+        >
+          <Expand className="w-3.5 h-3.5" />
+        </Button>
         <Button size="sm" className="h-7 text-xs gap-1.5 font-mono" disabled>
           <Download className="w-3 h-3" />
           export

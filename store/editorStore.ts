@@ -60,9 +60,9 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
       sourceStart: 0,
       sourceEnd: duration,
       speed: 1,
-      background: { type: 'color', color: '#111111' },
+      background: { type: 'gradient', color: '#0f0c29', gradientTo: '#302b63' },
       padding: 8,
-      frame: { enabled: false, color: '#ffffff', width: 2 },
+      frame: { enabled: false, color: '#ffffff', width: 2, opacity: 0.25, radius: 0 },
       zoomSegments: [],
     };
     set({

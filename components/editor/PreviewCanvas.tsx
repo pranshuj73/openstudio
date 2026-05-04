@@ -126,9 +126,19 @@ export default function PreviewCanvas() {
 
     // Frame overlay (drawn outside the clipping path)
     if (clip.frame.enabled) {
+      ctx.save();
+      ctx.globalAlpha = clip.frame.opacity ?? 1;
       ctx.strokeStyle = clip.frame.color;
       ctx.lineWidth = clip.frame.width;
-      ctx.strokeRect(drawX, drawY, drawW, drawH);
+      const r = clip.frame.radius ?? 0;
+      if (r > 0) {
+        ctx.beginPath();
+        ctx.roundRect(drawX, drawY, drawW, drawH, r);
+        ctx.stroke();
+      } else {
+        ctx.strokeRect(drawX, drawY, drawW, drawH);
+      }
+      ctx.restore();
     }
   }, [getOrLoadBgImage]);
 

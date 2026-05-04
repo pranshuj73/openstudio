@@ -24,6 +24,8 @@ export interface Frame {
   enabled: boolean;
   color: string;
   width: number;
+  opacity: number; // 0–1
+  radius: number;  // px
 }
 
 export interface Clip {
