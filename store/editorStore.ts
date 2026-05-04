@@ -33,7 +33,7 @@ interface EditorStore {
   updateZoomSegment: (clipId: string, segId: string, updates: Partial<Omit<ZoomSegment, 'id' | 'panKeyframes'>>) => void;
 
   // Pan keyframes
-  addPanKeyframe: (clipId: string, segId: string, kf: Omit<PanKeyframe, 'id'>) => void;
+  addPanKeyframe: (clipId: string, segId: string, kf: { time: number; x?: number; y?: number }) => void;
   removePanKeyframe: (clipId: string, segId: string, kfId: string) => void;
   updatePanKeyframe: (clipId: string, segId: string, kfId: string, updates: Partial<Omit<PanKeyframe, 'id'>>) => void;
 }
@@ -178,12 +178,13 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
               .sort((a, b) => a.time - b.time)
               .filter((k) => k.time < kf.time)
               .at(-1);
-            const inherited = prev ? { x: prev.x, y: prev.y } : {};
+            const x = kf.x ?? prev?.x ?? 0.5;
+            const y = kf.y ?? prev?.y ?? 0.5;
             return {
               ...seg,
               panKeyframes: [
                 ...seg.panKeyframes,
-                { ...inherited, ...kf, id: crypto.randomUUID() },
+                { time: kf.time, x, y, id: crypto.randomUUID() },
               ].sort((a, b) => a.time - b.time),
             };
           }),

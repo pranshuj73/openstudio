@@ -136,7 +136,7 @@ function ZoomPanel({ clipId, segId }: { clipId: string; segId: string }) {
               className="w-full h-7 text-xs gap-1.5 mb-3 font-mono"
               disabled={!inSeg}
               onClick={() =>
-                addPanKeyframe(clipId, segId, { time: currentTime, x: 0.5, y: 0.5 })
+                addPanKeyframe(clipId, segId, { time: currentTime })
               }
             >
               <Plus className="w-3 h-3" />
