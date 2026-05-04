@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useEditorStore } from '@/store/editorStore';
 import { getZoomForTime, getPanForTime } from '@/lib/editorUtils';
+import { registerVideo } from '@/lib/videoRegistry';
 
 const W = 1280;
 const H = 720;
@@ -144,6 +145,11 @@ export default function PreviewCanvas() {
       ctx.restore();
     }
   }, [getOrLoadBgImage]);
+
+  useEffect(() => {
+    registerVideo(videoRef.current);
+    return () => registerVideo(null);
+  }, []);
 
   useEffect(() => {
     const video = videoRef.current;

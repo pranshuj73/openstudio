@@ -1,4 +1,4 @@
-import type { ZoomSegment, PanKeyframe } from '@/types/editor';
+import type { ZoomSegment, PanKeyframe, Clip } from '@/types/editor';
 
 function lerp(a: number, b: number, t: number) {
   return a + (b - a) * t;
@@ -65,6 +65,22 @@ export function getPanForTime(
   }
 
   return { x: 0.5, y: 0.5 };
+}
+
+export interface OutputSegment {
+  clip: Clip;
+  outputStart: number;
+  outputEnd: number;
+}
+
+export function buildOutputTimeline(clips: Clip[]): OutputSegment[] {
+  let offset = 0;
+  return clips.map((clip) => {
+    const duration = (clip.sourceEnd - clip.sourceStart) / clip.speed;
+    const seg: OutputSegment = { clip, outputStart: offset, outputEnd: offset + duration };
+    offset += duration;
+    return seg;
+  });
 }
 
 export function formatTime(seconds: number): string {

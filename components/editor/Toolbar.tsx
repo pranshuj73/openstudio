@@ -1,11 +1,14 @@
 'use client';
 
+import { useState } from 'react';
 import { Play, Pause, Download, Expand } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useEditorStore } from '@/store/editorStore';
 import { formatTime } from '@/lib/editorUtils';
+import ExportDialog from './ExportDialog';
 
 export default function Toolbar() {
+  const [exportOpen, setExportOpen] = useState(false);
   const isPlaying = useEditorStore((s) => s.isPlaying);
   const setPlaying = useEditorStore((s) => s.setPlaying);
   const currentTime = useEditorStore((s) => s.currentTime);
@@ -47,11 +50,18 @@ export default function Toolbar() {
         >
           <Expand className="w-3.5 h-3.5" />
         </Button>
-        <Button size="sm" className="h-7 text-xs gap-1.5 font-mono" disabled>
+        <Button
+          size="sm"
+          className="h-7 text-xs gap-1.5 font-mono"
+          disabled={!videoUrl}
+          onClick={() => setExportOpen(true)}
+        >
           <Download className="w-3 h-3" />
           export
         </Button>
       </div>
+
+      <ExportDialog open={exportOpen} onOpenChange={setExportOpen} />
     </div>
   );
 }
