@@ -1,9 +1,6 @@
 import type { Clip } from '@/types/editor';
 import { getZoomForTime, getPanForTime } from './editorUtils';
 
-const W = 1280;
-const H = 720;
-
 function loadImage(url: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -36,6 +33,12 @@ export function renderFrameToCanvas(
 ): void {
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
+
+  const W = canvas.width;
+  const H = canvas.height;
+
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
 
   // Background
   if (clip.background.type === 'image' && clip.background.imageUrl) {

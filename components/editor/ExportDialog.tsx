@@ -100,7 +100,7 @@ export default function ExportDialog({ open, onOpenChange }: Props) {
           {/* Resolution info */}
           <div className="flex justify-between text-[10px] text-muted-foreground">
             <span>resolution</span>
-            <span>1280 × 720</span>
+            <span>source</span>
           </div>
 
           {/* Progress */}

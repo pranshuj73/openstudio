@@ -33,8 +33,8 @@ export async function exportToMp4(
   const totalFrames = Math.ceil(totalOutputDuration * fps);
 
   const canvas = document.createElement('canvas');
-  canvas.width = 1280;
-  canvas.height = 720;
+  canvas.width = video.videoWidth || 1920;
+  canvas.height = video.videoHeight || 1080;
 
   const target = new BufferTarget();
   const output = new Output({ format: new Mp4OutputFormat(), target });
