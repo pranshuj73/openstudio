@@ -30,7 +30,7 @@ export default function ExportDialog({ open, onOpenChange }: Props) {
 
     const controller = new AbortController();
     abortRef.current = controller;
-    setProgress({ phase: 'loading', framesRendered: 0, totalFrames: 0, percent: 0 });
+    setProgress({ phase: 'capturing', framesRendered: 0, totalFrames: 0, percent: 0 });
 
     try {
       const blob = await exportToMp4(video, clips, fps, setProgress, controller.signal);
@@ -64,8 +64,7 @@ export default function ExportDialog({ open, onOpenChange }: Props) {
 
   const phaseLabel = () => {
     if (!progress) return '';
-    if (progress.phase === 'loading') return 'Loading FFmpeg…';
-    if (progress.phase === 'encoding') return `Encoding… ${Math.round(progress.percent)}%`;
+    if (progress.phase === 'encoding') return 'Finalising…';
     return `Capturing frame ${progress.framesRendered} / ${progress.totalFrames} (${Math.round(progress.percent)}%)`;
   };
 
