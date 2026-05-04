@@ -56,7 +56,7 @@ export default function UploadZone() {
   return (
     <div className="w-full h-full flex items-center justify-center">
       <div
-        className="flex flex-col items-center gap-4 border-2 border-dashed border-border/40 rounded-2xl px-20 py-16 cursor-pointer hover:border-border/70 hover:bg-white/[0.02] transition-all group"
+        className="flex flex-col items-center gap-4 border-2 border-dashed border-border rounded-2xl px-20 py-16 cursor-pointer hover:bg-muted/50 transition-all group"
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => {
           e.preventDefault();
@@ -75,16 +75,12 @@ export default function UploadZone() {
             if (file) handleFile(file);
           }}
         />
-        <div className="w-12 h-12 rounded-xl bg-muted/60 flex items-center justify-center group-hover:bg-muted transition-colors">
+        <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
           <Upload className="w-5 h-5 text-muted-foreground" />
         </div>
         <div className="text-center">
-          <p className="font-mono text-sm text-foreground/70">
-            drop video or click to upload
-          </p>
-          <p className="font-mono text-xs text-muted-foreground/50 mt-1">
-            mp4 · mov · webm
-          </p>
+          <p className="text-sm text-foreground font-mono">drop video or click to upload</p>
+          <p className="text-xs text-muted-foreground mt-1 font-mono">mp4 · mov · webm</p>
         </div>
       </div>
     </div>

@@ -17,7 +17,7 @@ export default function Toolbar() {
 
   return (
     <div className="h-12 bg-card border-b border-border flex items-center justify-between px-4 shrink-0">
-      <span className="font-mono text-sm font-semibold tracking-tight select-none text-foreground/90">
+      <span className="font-mono text-sm font-semibold tracking-tight select-none">
         openstudio
       </span>
 
@@ -25,15 +25,11 @@ export default function Toolbar() {
         <Button
           variant="ghost"
           size="icon"
-          className="w-8 h-8 rounded-lg"
+          className="w-8 h-8"
           disabled={!videoUrl}
           onClick={() => setPlaying(!isPlaying)}
         >
-          {isPlaying ? (
-            <Pause className="w-3.5 h-3.5" />
-          ) : (
-            <Play className="w-3.5 h-3.5" />
-          )}
+          {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
         </Button>
         <span className="font-mono text-xs text-muted-foreground tabular-nums select-none w-32 text-center">
           {formatTime(currentTime)}&nbsp;/&nbsp;{formatTime(videoDuration)}
@@ -44,19 +40,19 @@ export default function Toolbar() {
         <Button
           variant="ghost"
           size="icon"
-          className="w-8 h-8 rounded-lg"
+          className="w-8 h-8"
           disabled={!videoUrl}
           onClick={() => document.getElementById('preview-area')?.requestFullscreen()}
         >
-          <Expand className="w-3.5 h-3.5" />
+          <Expand className="w-4 h-4" />
         </Button>
         <Button
           size="sm"
-          className="h-8 text-xs gap-1.5 font-mono px-3 rounded-lg"
+          className="gap-1.5 font-mono"
           disabled={!videoUrl}
           onClick={() => setExportOpen(true)}
         >
-          <Download className="w-3 h-3" />
+          <Download className="w-3.5 h-3.5" />
           export
         </Button>
       </div>

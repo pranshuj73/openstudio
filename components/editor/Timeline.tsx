@@ -117,36 +117,36 @@ export default function Timeline() {
     <div className="bg-card border-t border-border shrink-0 flex flex-col select-none" style={{ height: 240 }}>
 
       {/* Tool panel */}
-      <div className="h-11 border-b border-border flex items-center px-3 gap-1.5 shrink-0 bg-muted">
+      <div className="h-11 border-b border-border flex items-center px-3 gap-1.5 shrink-0">
         <Button
           variant="ghost"
           size="sm"
-          className="h-7 text-xs gap-1.5 font-mono rounded-md hover:bg-muted"
+          className="gap-1.5 font-mono"
           disabled={!videoDuration}
           onClick={() => splitAtTime(currentTime)}
         >
-          <Scissors className="w-3 h-3" />
+          <Scissors className="w-3.5 h-3.5" />
           cut
         </Button>
         <div className="w-px h-4 bg-border mx-0.5" />
         <Button
           variant="ghost"
           size="sm"
-          className="h-7 text-xs gap-1.5 font-mono rounded-md hover:bg-muted"
+          className="gap-1.5 font-mono"
           disabled={!selectedClip}
           onClick={addZoomAtPlayhead}
         >
-          <ZoomIn className="w-3 h-3" />
+          <ZoomIn className="w-3.5 h-3.5" />
           zoom
         </Button>
         {selectedClip && selectedClip.zoomSegments.length > 0 && (
-          <span className="font-mono text-[9px] text-muted-foreground ml-1">
+          <span className="text-xs text-muted-foreground ml-1 font-mono">
             {selectedClip.zoomSegments.length} region{selectedClip.zoomSegments.length !== 1 ? 's' : ''}
           </span>
         )}
       </div>
 
-      {/* Scrub area: ruler + clip track */}
+      {/* Scrub area */}
       <div
         ref={trackRef}
         className="relative flex-1 cursor-col-resize overflow-hidden"
@@ -165,7 +165,7 @@ export default function Timeline() {
         <div className="h-5 border-b border-border relative pointer-events-none bg-background">
           {rulerMarks().map((t) => (
             <div key={t} className="absolute top-0 flex flex-col items-start" style={{ left: pct(t) }}>
-              <div className="w-px h-1.5 bg-border/60" />
+              <div className="w-px h-1.5 bg-border" />
               <span className="font-mono text-[8px] text-muted-foreground leading-none mt-0.5 pl-0.5">{formatTime(t)}</span>
             </div>
           ))}
@@ -179,22 +179,18 @@ export default function Timeline() {
             return (
               <div
                 key={clip.id}
-                className={`absolute top-2 bottom-2 rounded-md overflow-hidden transition-colors ${
-                  selected
-                    ? 'ring-1 ring-white/20 border border-white/15'
-                    : 'border border-white/8 hover:border-white/14'
-                }`}
+                className={`absolute top-2 bottom-2 rounded-md overflow-hidden border ${selected ? 'border-primary/40 ring-1 ring-primary/20' : 'border-border'}`}
                 style={{ left: pct(clip.sourceStart), width: `${((clip.sourceEnd - clip.sourceStart) / videoDuration) * 100}%` }}
               >
                 {thumbnails.length > 0 && (
                   <div className="absolute inset-0 flex overflow-hidden">
                     {thumbnails.map((thumb, ti) => (
-                      <img key={ti} src={thumb} alt="" className="h-full w-auto object-cover shrink-0 opacity-35" draggable={false} />
+                      <img key={ti} src={thumb} alt="" className="h-full w-auto object-cover shrink-0 opacity-40" draggable={false} />
                     ))}
                   </div>
                 )}
                 <div className="absolute inset-0 flex items-end px-2 pb-1.5 pointer-events-none">
-                  <span className="font-mono text-[8px] text-white/50 bg-black/30 px-1 py-px rounded">
+                  <span className="font-mono text-[9px] bg-background/70 text-foreground px-1 py-px rounded">
                     {i + 1}{clip.speed !== 1 ? ` · ${clip.speed}x` : ''}
                   </span>
                 </div>
@@ -208,65 +204,61 @@ export default function Timeline() {
             return (
               <div
                 key={seg.id}
-                className={`absolute top-1 bottom-1 z-10 cursor-grab active:cursor-grabbing overflow-hidden rounded-md transition-all ${
+                className={`absolute top-1 bottom-1 z-10 cursor-grab active:cursor-grabbing overflow-hidden rounded-md transition-colors ${
                   isActive
-                    ? 'bg-blue-500/30 border border-blue-400/60 ring-1 ring-blue-400/20'
-                    : 'bg-blue-500/12 border border-blue-500/25 hover:bg-blue-500/22 hover:border-blue-400/45'
+                    ? 'bg-blue-500/30 border border-blue-400/60'
+                    : 'bg-blue-500/10 border border-blue-500/30 hover:bg-blue-500/20'
                 }`}
                 style={{ left: pct(seg.startTime), width: `${((seg.endTime - seg.startTime) / videoDuration) * 100}%` }}
-                onClick={() => {
-                  setSidebarPanel(
-                    isActive ? { type: 'clip' } : { type: 'zoom', segId: seg.id }
-                  );
-                }}
+                onClick={() => setSidebarPanel(isActive ? { type: 'clip' } : { type: 'zoom', segId: seg.id })}
                 onPointerDown={(e) => {
                   setSidebarPanel({ type: 'zoom', segId: seg.id });
                   startSegDrag(e, seg, selectedClip.id, 'move');
                 }}
               >
                 <div
-                  className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-blue-300/15 rounded-l-md"
+                  className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize"
                   onPointerDown={(e) => { e.stopPropagation(); startSegDrag(e, seg, selectedClip.id, 'left'); }}
                 />
-                <span className="absolute inset-0 flex items-center justify-center font-mono text-[8px] text-blue-200/60 pointer-events-none">
+                <span className="absolute inset-0 flex items-center justify-center font-mono text-[9px] text-blue-200 pointer-events-none">
                   {seg.scale}x
                 </span>
                 {seg.panKeyframes.map((kf) => (
                   <div
                     key={kf.id}
-                    className="absolute top-1 bottom-1 w-px bg-blue-300/50 pointer-events-none"
+                    className="absolute top-1 bottom-1 w-px bg-blue-300/60 pointer-events-none"
                     style={{ left: `${((kf.time - seg.startTime) / (seg.endTime - seg.startTime)) * 100}%` }}
                   />
                 ))}
                 <div
-                  className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-blue-300/15 rounded-r-md"
+                  className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize"
                   onPointerDown={(e) => { e.stopPropagation(); startSegDrag(e, seg, selectedClip.id, 'right'); }}
                 />
               </div>
             );
           })}
 
-          {!videoDuration && <div className="absolute inset-3 border border-dashed border-border/30 rounded-lg" />}
+          {!videoDuration && <div className="absolute inset-3 border border-dashed border-border rounded-lg" />}
         </div>
 
         {/* Playhead */}
         {videoDuration > 0 && (
           <div
-            className="absolute top-0 bottom-0 w-px bg-white/70 z-20 pointer-events-none"
+            className="absolute top-0 bottom-0 w-px bg-foreground z-20 pointer-events-none"
             style={{ left: `${playheadPct}%` }}
           >
-            <div className="w-2 h-2 rounded-full bg-white absolute top-0.5 -translate-x-[3px]" />
+            <div className="w-2 h-2 rounded-full bg-foreground absolute top-0.5 -translate-x-[3px]" />
           </div>
         )}
       </div>
 
       {/* Status bar */}
-      <div className="h-5 border-t border-border flex items-center px-4 gap-4 shrink-0 bg-background">
-        <span className="font-mono text-[9px] text-muted-foreground">
+      <div className="h-6 border-t border-border flex items-center px-4 gap-4 shrink-0 bg-background">
+        <span className="font-mono text-xs text-muted-foreground">
           {clips.length} clip{clips.length !== 1 ? 's' : ''}
         </span>
         {videoDuration > 0 && (
-          <span className="font-mono text-[9px] text-muted-foreground">{formatTime(videoDuration)}</span>
+          <span className="font-mono text-xs text-muted-foreground">{formatTime(videoDuration)}</span>
         )}
       </div>
     </div>
