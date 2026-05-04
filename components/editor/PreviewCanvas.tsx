@@ -219,7 +219,7 @@ export default function PreviewCanvas() {
   }, [renderFrame]);
 
   return (
-    <div className="w-full h-full flex items-center justify-center bg-[#05050a]">
+    <div className="w-full h-full flex items-center justify-center bg-[#020208]">
       <video
         ref={videoRef}
         src={videoUrl ?? undefined}

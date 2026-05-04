@@ -117,7 +117,7 @@ export default function Timeline() {
     <div className="bg-card border-t border-border shrink-0 flex flex-col select-none" style={{ height: 240 }}>
 
       {/* Tool panel */}
-      <div className="h-11 border-b border-border flex items-center px-3 gap-1.5 shrink-0 bg-muted/50">
+      <div className="h-11 border-b border-border flex items-center px-3 gap-1.5 shrink-0 bg-muted">
         <Button
           variant="ghost"
           size="sm"
@@ -162,7 +162,7 @@ export default function Timeline() {
         onPointerUp={() => { dragRef.current = { type: 'none' }; isScrubbing.current = false; }}
       >
         {/* Ruler */}
-        <div className="h-5 border-b border-border relative pointer-events-none bg-background/40">
+        <div className="h-5 border-b border-border relative pointer-events-none bg-background">
           {rulerMarks().map((t) => (
             <div key={t} className="absolute top-0 flex flex-col items-start" style={{ left: pct(t) }}>
               <div className="w-px h-1.5 bg-border/60" />
@@ -261,7 +261,7 @@ export default function Timeline() {
       </div>
 
       {/* Status bar */}
-      <div className="h-5 border-t border-border flex items-center px-4 gap-4 shrink-0 bg-background/60">
+      <div className="h-5 border-t border-border flex items-center px-4 gap-4 shrink-0 bg-background">
         <span className="font-mono text-[9px] text-muted-foreground/50">
           {clips.length} clip{clips.length !== 1 ? 's' : ''}
         </span>

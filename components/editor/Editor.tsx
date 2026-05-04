@@ -38,7 +38,7 @@ export default function Editor() {
     <div className="flex flex-col h-screen overflow-hidden bg-background">
       <Toolbar />
       <div className="flex flex-1 overflow-hidden min-h-0">
-        <div id="preview-area" className="flex-1 overflow-hidden relative bg-[#05050a]">
+        <div id="preview-area" className="flex-1 overflow-hidden relative bg-[#020208]">
           {videoUrl ? <PreviewCanvas /> : <UploadZone />}
         </div>
         <PropertiesPanel />
