@@ -16,8 +16,8 @@ export default function Toolbar() {
   const videoUrl = useEditorStore((s) => s.videoUrl);
 
   return (
-    <div className="h-11 bg-background border-b border-border flex items-center justify-between px-4 shrink-0">
-      <span className="font-mono text-sm font-semibold tracking-tight select-none">
+    <div className="h-12 bg-card/60 backdrop-blur-sm border-b border-border/60 flex items-center justify-between px-4 shrink-0">
+      <span className="font-mono text-sm font-semibold tracking-tight select-none text-foreground/90">
         openstudio
       </span>
 
@@ -25,7 +25,7 @@ export default function Toolbar() {
         <Button
           variant="ghost"
           size="icon"
-          className="w-7 h-7"
+          className="w-8 h-8 rounded-lg"
           disabled={!videoUrl}
           onClick={() => setPlaying(!isPlaying)}
         >
@@ -44,7 +44,7 @@ export default function Toolbar() {
         <Button
           variant="ghost"
           size="icon"
-          className="w-7 h-7"
+          className="w-8 h-8 rounded-lg"
           disabled={!videoUrl}
           onClick={() => document.getElementById('preview-area')?.requestFullscreen()}
         >
@@ -52,7 +52,7 @@ export default function Toolbar() {
         </Button>
         <Button
           size="sm"
-          className="h-7 text-xs gap-1.5 font-mono"
+          className="h-8 text-xs gap-1.5 font-mono px-3 rounded-lg"
           disabled={!videoUrl}
           onClick={() => setExportOpen(true)}
         >

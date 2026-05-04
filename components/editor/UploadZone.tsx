@@ -19,10 +19,7 @@ async function generateThumbnails(url: string, duration: number, count = 20): Pr
     let i = 0;
 
     const seekNext = () => {
-      if (i >= count) {
-        resolve(thumbs);
-        return;
-      }
+      if (i >= count) { resolve(thumbs); return; }
       video.currentTime = (i / (count - 1)) * duration;
       i++;
     };
@@ -59,7 +56,7 @@ export default function UploadZone() {
   return (
     <div className="w-full h-full flex items-center justify-center">
       <div
-        className="flex flex-col items-center gap-3 border border-dashed border-border px-20 py-14 cursor-pointer hover:border-foreground/30 transition-colors"
+        className="flex flex-col items-center gap-4 border-2 border-dashed border-border/40 rounded-2xl px-20 py-16 cursor-pointer hover:border-border/70 hover:bg-white/[0.02] transition-all group"
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => {
           e.preventDefault();
@@ -78,12 +75,14 @@ export default function UploadZone() {
             if (file) handleFile(file);
           }}
         />
-        <Upload className="w-6 h-6 text-muted-foreground" />
+        <div className="w-12 h-12 rounded-xl bg-muted/60 flex items-center justify-center group-hover:bg-muted transition-colors">
+          <Upload className="w-5 h-5 text-muted-foreground" />
+        </div>
         <div className="text-center">
-          <p className="font-mono text-sm text-muted-foreground">
+          <p className="font-mono text-sm text-foreground/70">
             drop video or click to upload
           </p>
-          <p className="font-mono text-xs text-muted-foreground/50 mt-0.5">
+          <p className="font-mono text-xs text-muted-foreground/50 mt-1">
             mp4 · mov · webm
           </p>
         </div>
