@@ -161,6 +161,17 @@ export default function PreviewCanvas() {
     }
   }, [isPlaying, videoUrl]);
 
+  // Render first frame once video data is available
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !videoUrl) return;
+    const onReady = () => renderFrame();
+    video.addEventListener('loadeddata', onReady);
+    // If already ready, render immediately
+    if (video.readyState >= 2) renderFrame();
+    return () => video.removeEventListener('loadeddata', onReady);
+  }, [videoUrl, renderFrame]);
+
   useEffect(() => {
     return useEditorStore.subscribe((state) => {
       const video = videoRef.current;
