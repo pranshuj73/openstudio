@@ -38,7 +38,12 @@ export async function exportToMp4(
 
   const target = new BufferTarget();
   const output = new Output({ format: new Mp4OutputFormat(), target });
-  const videoSource = new CanvasSource(canvas, { codec: 'avc', bitrate: QUALITY_HIGH });
+  const videoSource = new CanvasSource(canvas, {
+    codec: 'avc',
+    bitrate: QUALITY_HIGH,
+    hardwareAcceleration: 'prefer-hardware',
+    bitrateMode: 'variable',
+  });
   output.addVideoTrack(videoSource, { frameRate: fps });
 
   await output.start();
@@ -64,6 +69,7 @@ export async function exportToMp4(
       onProgress({ phase: 'capturing', framesRendered: i + 1, totalFrames, percent: ((i + 1) / totalFrames) * 100 });
     }
 
+    videoSource.close(); // signal completion so output can plan ahead during finalize
     onProgress({ phase: 'encoding', framesRendered: totalFrames, totalFrames, percent: 100 });
     await output.finalize();
 
