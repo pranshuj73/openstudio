@@ -33,7 +33,7 @@ function bgMatch(a: Background, b: Background) {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p className="font-mono text-[10px] text-muted-foreground/50 uppercase tracking-widest mb-2.5">
+    <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-widest mb-2.5">
       {children}
     </p>
   );
@@ -73,7 +73,7 @@ function ZoomPanel({ clipId, segId }: { clipId: string; segId: string }) {
         </button>
         <span className="text-border">·</span>
         <span className="font-mono text-xs font-medium">zoom</span>
-        <span className="ml-auto font-mono text-[10px] text-muted-foreground/40">
+        <span className="ml-auto font-mono text-[10px] text-muted-foreground">
           {formatTime(seg.startTime)} → {formatTime(seg.endTime)}
         </span>
       </div>
@@ -147,7 +147,7 @@ function ZoomPanel({ clipId, segId }: { clipId: string; segId: string }) {
             </Button>
 
             {seg.panKeyframes.length === 0 ? (
-              <p className="font-mono text-[10px] text-muted-foreground/30 text-center py-3">
+              <p className="font-mono text-[10px] text-muted-foreground text-center py-3">
                 add keyframes to pan while zoomed
               </p>
             ) : (
@@ -155,7 +155,7 @@ function ZoomPanel({ clipId, segId }: { clipId: string; segId: string }) {
                 {seg.panKeyframes.map((kf) => (
                   <div key={kf.id} className="bg-card rounded-lg px-3 py-2.5 space-y-2.5">
                     <div className="flex items-center justify-between">
-                      <span className="font-mono text-[10px] text-muted-foreground/70">
+                      <span className="font-mono text-[10px] text-muted-foreground">
                         {formatTime(kf.time)}
                       </span>
                       <button
@@ -166,7 +166,7 @@ function ZoomPanel({ clipId, segId }: { clipId: string; segId: string }) {
                       </button>
                     </div>
                     <div>
-                      <Label className="font-mono text-[10px] text-muted-foreground/60 mb-1 block">
+                      <Label className="font-mono text-[10px] text-muted-foreground mb-1 block">
                         x&nbsp;&nbsp;<span className="text-foreground/80">{kf.x.toFixed(2)}</span>
                       </Label>
                       <Slider
@@ -176,7 +176,7 @@ function ZoomPanel({ clipId, segId }: { clipId: string; segId: string }) {
                       />
                     </div>
                     <div>
-                      <Label className="font-mono text-[10px] text-muted-foreground/60 mb-1 block">
+                      <Label className="font-mono text-[10px] text-muted-foreground mb-1 block">
                         y&nbsp;&nbsp;<span className="text-foreground/80">{kf.y.toFixed(2)}</span>
                       </Label>
                       <Slider
@@ -302,7 +302,7 @@ function ClipPanel({ clipId }: { clipId: string }) {
         {clip.background.type === 'gradient' && (
           <div className="flex gap-2 mt-2">
             <div className="flex-1">
-              <Label className="font-mono text-[10px] text-muted-foreground/60 mb-1 block">from</Label>
+              <Label className="font-mono text-[10px] text-muted-foreground mb-1 block">from</Label>
               <input
                 type="color"
                 value={clip.background.color}
@@ -313,7 +313,7 @@ function ClipPanel({ clipId }: { clipId: string }) {
               />
             </div>
             <div className="flex-1">
-              <Label className="font-mono text-[10px] text-muted-foreground/60 mb-1 block">to</Label>
+              <Label className="font-mono text-[10px] text-muted-foreground mb-1 block">to</Label>
               <input
                 type="color"
                 value={clip.background.gradientTo ?? '#000000'}
@@ -339,7 +339,7 @@ function ClipPanel({ clipId }: { clipId: string }) {
             onValueChange={([v]) => updateClip(clip.id, { padding: v })}
             className="flex-1"
           />
-          <span className="font-mono text-xs text-muted-foreground/70 w-8 text-right shrink-0">
+          <span className="font-mono text-xs text-muted-foreground w-8 text-right shrink-0">
             {clip.padding}%
           </span>
         </div>
@@ -350,7 +350,7 @@ function ClipPanel({ clipId }: { clipId: string }) {
       {/* Frame */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <p className="font-mono text-[10px] text-muted-foreground/50 uppercase tracking-widest">frame</p>
+          <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-widest">frame</p>
           <Switch
             checked={clip.frame.enabled}
             onCheckedChange={(v) => updateClip(clip.id, { frame: { ...clip.frame, enabled: v } })}
@@ -358,7 +358,7 @@ function ClipPanel({ clipId }: { clipId: string }) {
         </div>
         <div className={`space-y-3 ${clip.frame.enabled ? '' : 'opacity-40 pointer-events-none'}`}>
           <div>
-            <Label className="font-mono text-[10px] text-muted-foreground/60 mb-1.5 block">color</Label>
+            <Label className="font-mono text-[10px] text-muted-foreground mb-1.5 block">color</Label>
             <input
               type="color"
               value={clip.frame.color}
@@ -367,7 +367,7 @@ function ClipPanel({ clipId }: { clipId: string }) {
             />
           </div>
           <div>
-            <Label className="font-mono text-[10px] text-muted-foreground/60 mb-1.5 block">
+            <Label className="font-mono text-[10px] text-muted-foreground mb-1.5 block">
               opacity&nbsp;&nbsp;<span className="text-foreground/80">{Math.round((clip.frame.opacity ?? 1) * 100)}%</span>
             </Label>
             <Slider
@@ -377,7 +377,7 @@ function ClipPanel({ clipId }: { clipId: string }) {
             />
           </div>
           <div>
-            <Label className="font-mono text-[10px] text-muted-foreground/60 mb-1.5 block">
+            <Label className="font-mono text-[10px] text-muted-foreground mb-1.5 block">
               thickness&nbsp;&nbsp;<span className="text-foreground/80">{clip.frame.width}px</span>
             </Label>
             <Slider
@@ -387,7 +387,7 @@ function ClipPanel({ clipId }: { clipId: string }) {
             />
           </div>
           <div>
-            <Label className="font-mono text-[10px] text-muted-foreground/60 mb-1.5 block">
+            <Label className="font-mono text-[10px] text-muted-foreground mb-1.5 block">
               radius&nbsp;&nbsp;<span className="text-foreground/80">{clip.frame.radius ?? 0}px</span>
             </Label>
             <Slider
@@ -433,7 +433,7 @@ export default function PropertiesPanel() {
   if (!clip) {
     return (
       <div className="w-72 border-l border-border bg-card flex items-center justify-center shrink-0">
-        <p className="font-mono text-xs text-muted-foreground/30">no clip selected</p>
+        <p className="font-mono text-xs text-muted-foreground">no clip selected</p>
       </div>
     );
   }

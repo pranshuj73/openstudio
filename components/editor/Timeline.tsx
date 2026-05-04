@@ -140,7 +140,7 @@ export default function Timeline() {
           zoom
         </Button>
         {selectedClip && selectedClip.zoomSegments.length > 0 && (
-          <span className="font-mono text-[9px] text-muted-foreground/40 ml-1">
+          <span className="font-mono text-[9px] text-muted-foreground ml-1">
             {selectedClip.zoomSegments.length} region{selectedClip.zoomSegments.length !== 1 ? 's' : ''}
           </span>
         )}
@@ -166,7 +166,7 @@ export default function Timeline() {
           {rulerMarks().map((t) => (
             <div key={t} className="absolute top-0 flex flex-col items-start" style={{ left: pct(t) }}>
               <div className="w-px h-1.5 bg-border/60" />
-              <span className="font-mono text-[8px] text-muted-foreground/50 leading-none mt-0.5 pl-0.5">{formatTime(t)}</span>
+              <span className="font-mono text-[8px] text-muted-foreground leading-none mt-0.5 pl-0.5">{formatTime(t)}</span>
             </div>
           ))}
         </div>
@@ -262,11 +262,11 @@ export default function Timeline() {
 
       {/* Status bar */}
       <div className="h-5 border-t border-border flex items-center px-4 gap-4 shrink-0 bg-background">
-        <span className="font-mono text-[9px] text-muted-foreground/50">
+        <span className="font-mono text-[9px] text-muted-foreground">
           {clips.length} clip{clips.length !== 1 ? 's' : ''}
         </span>
         {videoDuration > 0 && (
-          <span className="font-mono text-[9px] text-muted-foreground/50">{formatTime(videoDuration)}</span>
+          <span className="font-mono text-[9px] text-muted-foreground">{formatTime(videoDuration)}</span>
         )}
       </div>
     </div>
