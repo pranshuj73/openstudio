@@ -20,8 +20,8 @@ export default function Toolbar() {
     <div className="h-12 flex items-center px-4">
       {/* Brand */}
       <div className="flex items-center gap-2 w-44 shrink-0">
-        <div className="w-5 h-5 rounded-md bg-primary/20 flex items-center justify-center shrink-0">
-          <div className="w-2 h-2 rounded-sm bg-primary" />
+        <div className="w-6 h-6 rounded-md bg-gradient-to-br from-violet-500/30 to-indigo-600/20 border border-violet-500/25 flex items-center justify-center shrink-0">
+          <div className="w-2.5 h-2.5 rounded-sm bg-gradient-to-br from-violet-400 to-indigo-500" />
         </div>
         <span className="font-mono text-sm font-semibold tracking-tight select-none">
           openstudio
@@ -63,7 +63,7 @@ export default function Toolbar() {
         >
           <SkipForward className="w-3.5 h-3.5" />
         </Button>
-        <div className="ml-3 px-2.5 py-1 bg-muted rounded-md border border-border">
+        <div className="ml-3 px-2.5 py-1 bg-muted rounded-md border border-primary/20">
           <span className="font-mono text-xs tabular-nums select-none text-muted-foreground">
             {formatTime(currentTime)}&thinsp;/&thinsp;{formatTime(videoDuration)}
           </span>

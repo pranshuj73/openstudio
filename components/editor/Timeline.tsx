@@ -125,7 +125,7 @@ export default function Timeline() {
     <div className="flex flex-col select-none h-full">
 
       {/* Tool bar */}
-      <div className="h-10 border-b border-border flex items-center px-2.5 gap-0.5 shrink-0">
+      <div className="h-10 border-b border-border bg-gradient-to-r from-primary/6 to-transparent flex items-center px-2.5 gap-0.5 shrink-0">
         <Button
           variant="ghost"
           size="sm"
@@ -289,10 +289,10 @@ export default function Timeline() {
         {/* Playhead */}
         {videoDuration > 0 && (
           <div
-            className="absolute top-0 bottom-0 w-px bg-foreground/70 z-20 pointer-events-none"
+            className="absolute top-0 bottom-0 w-px bg-primary/80 z-20 pointer-events-none"
             style={{ left: `${playheadPct}%` }}
           >
-            <div className="w-2 h-2 rounded-full bg-foreground/70 absolute top-0.5 -translate-x-[3px]" />
+            <div className="w-2 h-2 rounded-full bg-primary absolute top-0.5 -translate-x-[3px]" />
           </div>
         )}
       </div>

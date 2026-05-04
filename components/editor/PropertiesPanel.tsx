@@ -33,7 +33,7 @@ function bgMatch(a: Background, b: Background) {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-widest mb-2.5 font-mono">
+    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-2.5 font-mono">
       {children}
     </p>
   );
@@ -42,7 +42,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 // ─── Panel header ──────────────────────────────────────────────────────────
 function PanelHeader({ children, onCollapse }: { children: React.ReactNode; onCollapse?: () => void }) {
   return (
-    <div className="h-10 border-b border-border flex items-center px-3 gap-2 shrink-0">
+    <div className="h-10 border-b border-border bg-gradient-to-r from-primary/8 to-transparent flex items-center px-3 gap-2 shrink-0">
       <span className="flex-1 text-xs font-mono font-medium text-muted-foreground">{children}</span>
       {onCollapse && (
         <Button
@@ -89,7 +89,7 @@ function ZoomPanel({
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="h-10 border-b border-border flex items-center px-3 gap-2 shrink-0">
+      <div className="h-10 border-b border-border bg-gradient-to-r from-primary/8 to-transparent flex items-center px-3 gap-2 shrink-0">
         <button
           onClick={() => setSidebarPanel({ type: 'clip' })}
           className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors font-mono"
@@ -98,7 +98,7 @@ function ZoomPanel({
           clip
         </button>
         <span className="text-muted-foreground/40 text-xs">/</span>
-        <span className="text-xs font-medium font-mono">zoom</span>
+        <span className="text-xs font-medium font-mono text-muted-foreground">zoom</span>
         <span className="ml-auto text-[10px] text-muted-foreground font-mono tabular-nums">
           {formatTime(seg.startTime)}–{formatTime(seg.endTime)}
         </span>
