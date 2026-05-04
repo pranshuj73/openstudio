@@ -112,8 +112,13 @@ export default function PreviewCanvas() {
 
     ctx.save();
     // Clip to video rect so zoom never overflows into padding/background
+    const r = clip.frame.radius ?? 0;
     ctx.beginPath();
-    ctx.rect(drawX, drawY, drawW, drawH);
+    if (r > 0) {
+      ctx.roundRect(drawX, drawY, drawW, drawH, r);
+    } else {
+      ctx.rect(drawX, drawY, drawW, drawH);
+    }
     ctx.clip();
 
     const cx = drawX + drawW * pan.x;
