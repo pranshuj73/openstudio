@@ -62,7 +62,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
       speed: 1,
       background: { type: 'gradient', color: '#0f0c29', gradientTo: '#302b63' },
       padding: 8,
-      frame: { enabled: false, color: '#ffffff', width: 2, opacity: 0.25, radius: 0 },
+      frame: { enabled: true, color: '#ffffff', width: 2, opacity: 0.25, radius: 0 },
       zoomSegments: [],
     };
     set({
