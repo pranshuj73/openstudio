@@ -61,9 +61,9 @@ function ZoomPanel({ clipId, segId }: { clipId: string; segId: string }) {
   const inSeg = currentTime >= seg.startTime && currentTime <= seg.endTime;
 
   return (
-    <div className="w-72 border-l border-border/60 bg-background flex flex-col shrink-0 overflow-hidden">
+    <div className="w-72 border-l border-border bg-card flex flex-col shrink-0 overflow-hidden">
       {/* Header */}
-      <div className="h-11 border-b border-border/60 flex items-center px-3 gap-2 shrink-0 bg-card/40">
+      <div className="h-11 border-b border-border flex items-center px-3 gap-2 shrink-0 bg-muted/50">
         <button
           onClick={() => setSidebarPanel({ type: 'clip' })}
           className="flex items-center gap-1 font-mono text-[10px] text-muted-foreground hover:text-foreground transition-colors"
@@ -432,7 +432,7 @@ export default function PropertiesPanel() {
 
   if (!clip) {
     return (
-      <div className="w-72 border-l border-border/60 bg-background flex items-center justify-center shrink-0">
+      <div className="w-72 border-l border-border bg-card flex items-center justify-center shrink-0">
         <p className="font-mono text-xs text-muted-foreground/30">no clip selected</p>
       </div>
     );
@@ -443,7 +443,7 @@ export default function PropertiesPanel() {
   }
 
   return (
-    <div className="w-72 border-l border-border/60 bg-background overflow-y-auto shrink-0">
+    <div className="w-72 border-l border-border bg-card overflow-y-auto shrink-0">
       <ClipPanel clipId={clip.id} />
     </div>
   );
