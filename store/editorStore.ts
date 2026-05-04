@@ -167,24 +167,28 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
 
   addPanKeyframe: (clipId, segId, kf) =>
     set((s) => ({
-      clips: s.clips.map((c) =>
-        c.id === clipId
-          ? {
-              ...c,
-              zoomSegments: c.zoomSegments.map((seg) =>
-                seg.id === segId
-                  ? {
-                      ...seg,
-                      panKeyframes: [
-                        ...seg.panKeyframes,
-                        { ...kf, id: crypto.randomUUID() },
-                      ].sort((a, b) => a.time - b.time),
-                    }
-                  : seg
-              ),
-            }
-          : c
-      ),
+      clips: s.clips.map((c) => {
+        if (c.id !== clipId) return c;
+        return {
+          ...c,
+          zoomSegments: c.zoomSegments.map((seg) => {
+            if (seg.id !== segId) return seg;
+            // Inherit x/y from the most recent keyframe before this time
+            const prev = [...seg.panKeyframes]
+              .sort((a, b) => a.time - b.time)
+              .filter((k) => k.time < kf.time)
+              .at(-1);
+            const inherited = prev ? { x: prev.x, y: prev.y } : {};
+            return {
+              ...seg,
+              panKeyframes: [
+                ...seg.panKeyframes,
+                { ...inherited, ...kf, id: crypto.randomUUID() },
+              ].sort((a, b) => a.time - b.time),
+            };
+          }),
+        };
+      }),
     })),
 
   removePanKeyframe: (clipId, segId, kfId) =>
