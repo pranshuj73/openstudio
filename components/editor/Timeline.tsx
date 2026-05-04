@@ -66,7 +66,14 @@ export default function Timeline() {
   ) => {
     e.stopPropagation();
     trackRef.current?.setPointerCapture(e.pointerId);
-    dragRef.current = { type: mode, segId: seg.id, clipId, startX: e.clientX, origStart: seg.startTime, origEnd: seg.endTime };
+    dragRef.current = {
+      type: mode,
+      segId: seg.id,
+      clipId,
+      startX: e.clientX,
+      origStart: seg.startTime,
+      origEnd: seg.endTime,
+    };
   };
 
   const handleTrackPointerMove = (e: React.PointerEvent) => {
@@ -104,7 +111,8 @@ export default function Timeline() {
 
   const rulerMarks = () => {
     if (!videoDuration) return [];
-    const step = videoDuration <= 15 ? 1 : videoDuration <= 60 ? 5 : videoDuration <= 300 ? 10 : 30;
+    const step =
+      videoDuration <= 15 ? 1 : videoDuration <= 60 ? 5 : videoDuration <= 300 ? 10 : 30;
     const marks: number[] = [];
     for (let t = 0; t <= videoDuration; t += step) marks.push(t);
     return marks;
@@ -116,32 +124,32 @@ export default function Timeline() {
   return (
     <div className="flex flex-col select-none h-full">
 
-      {/* Tool panel */}
-      <div className="h-11 border-b border-border flex items-center px-3 gap-1.5 shrink-0">
+      {/* Tool bar */}
+      <div className="h-10 border-b border-border flex items-center px-2.5 gap-0.5 shrink-0">
         <Button
           variant="ghost"
           size="sm"
-          className="gap-1.5 font-mono"
+          className="gap-1.5 font-mono text-xs h-7 px-2.5"
           disabled={!videoDuration}
           onClick={() => splitAtTime(currentTime)}
         >
-          <Scissors className="w-3.5 h-3.5" />
+          <Scissors className="w-3 h-3" />
           cut
         </Button>
-        <div className="w-px h-4 bg-border mx-0.5" />
+        <div className="w-px h-3.5 bg-border mx-1" />
         <Button
           variant="ghost"
           size="sm"
-          className="gap-1.5 font-mono"
+          className="gap-1.5 font-mono text-xs h-7 px-2.5"
           disabled={!selectedClip}
           onClick={addZoomAtPlayhead}
         >
-          <ZoomIn className="w-3.5 h-3.5" />
+          <ZoomIn className="w-3 h-3" />
           zoom
         </Button>
         {selectedClip && selectedClip.zoomSegments.length > 0 && (
-          <span className="text-xs text-muted-foreground ml-1 font-mono">
-            {selectedClip.zoomSegments.length} region{selectedClip.zoomSegments.length !== 1 ? 's' : ''}
+          <span className="text-[10px] text-muted-foreground ml-1 font-mono">
+            {selectedClip.zoomSegments.length}&nbsp;region{selectedClip.zoomSegments.length !== 1 ? 's' : ''}
           </span>
         )}
       </div>
@@ -159,14 +167,23 @@ export default function Timeline() {
           }
         }}
         onPointerMove={handleTrackPointerMove}
-        onPointerUp={() => { dragRef.current = { type: 'none' }; isScrubbing.current = false; }}
+        onPointerUp={() => {
+          dragRef.current = { type: 'none' };
+          isScrubbing.current = false;
+        }}
       >
         {/* Ruler */}
-        <div className="h-5 border-b border-border relative pointer-events-none bg-background">
+        <div className="h-5 border-b border-border relative pointer-events-none bg-background/60">
           {rulerMarks().map((t) => (
-            <div key={t} className="absolute top-0 flex flex-col items-start" style={{ left: pct(t) }}>
-              <div className="w-px h-1.5 bg-border" />
-              <span className="font-mono text-[8px] text-muted-foreground leading-none mt-0.5 pl-0.5">{formatTime(t)}</span>
+            <div
+              key={t}
+              className="absolute top-0 flex flex-col items-start"
+              style={{ left: pct(t) }}
+            >
+              <div className="w-px h-1.5 bg-border/60" />
+              <span className="font-mono text-[8px] text-muted-foreground/60 leading-none mt-0.5 pl-0.5">
+                {formatTime(t)}
+              </span>
             </div>
           ))}
         </div>
@@ -179,18 +196,31 @@ export default function Timeline() {
             return (
               <div
                 key={clip.id}
-                className={`absolute top-2 bottom-2 rounded-md overflow-hidden border ${selected ? 'border-primary/40 ring-1 ring-primary/20' : 'border-border'}`}
-                style={{ left: pct(clip.sourceStart), width: `${((clip.sourceEnd - clip.sourceStart) / videoDuration) * 100}%` }}
+                className={`absolute top-2 bottom-2 rounded overflow-hidden border transition-colors ${
+                  selected
+                    ? 'border-primary/50 ring-1 ring-primary/20 ring-offset-0'
+                    : 'border-border/60'
+                }`}
+                style={{
+                  left: pct(clip.sourceStart),
+                  width: `${((clip.sourceEnd - clip.sourceStart) / videoDuration) * 100}%`,
+                }}
               >
                 {thumbnails.length > 0 && (
                   <div className="absolute inset-0 flex overflow-hidden">
                     {thumbnails.map((thumb, ti) => (
-                      <img key={ti} src={thumb} alt="" className="h-full w-auto object-cover shrink-0 opacity-40" draggable={false} />
+                      <img
+                        key={ti}
+                        src={thumb}
+                        alt=""
+                        className="h-full w-auto object-cover shrink-0 opacity-30"
+                        draggable={false}
+                      />
                     ))}
                   </div>
                 )}
                 <div className="absolute inset-0 flex items-end px-2 pb-1.5 pointer-events-none">
-                  <span className="font-mono text-[9px] bg-background/70 text-foreground px-1 py-px rounded">
+                  <span className="font-mono text-[8px] bg-background/60 text-foreground/70 px-1 py-px rounded">
                     {i + 1}{clip.speed !== 1 ? ` · ${clip.speed}x` : ''}
                   </span>
                 </div>
@@ -204,13 +234,18 @@ export default function Timeline() {
             return (
               <div
                 key={seg.id}
-                className={`absolute top-1 bottom-1 z-10 cursor-grab active:cursor-grabbing overflow-hidden rounded-md transition-colors ${
+                className={`absolute top-1 bottom-1 z-10 cursor-grab active:cursor-grabbing overflow-hidden rounded transition-colors ${
                   isActive
-                    ? 'bg-blue-500/30 border border-blue-400/60'
-                    : 'bg-blue-500/10 border border-blue-500/30 hover:bg-blue-500/20'
+                    ? 'bg-primary/25 border border-primary/60'
+                    : 'bg-primary/10 border border-primary/25 hover:bg-primary/20'
                 }`}
-                style={{ left: pct(seg.startTime), width: `${((seg.endTime - seg.startTime) / videoDuration) * 100}%` }}
-                onClick={() => setSidebarPanel(isActive ? { type: 'clip' } : { type: 'zoom', segId: seg.id })}
+                style={{
+                  left: pct(seg.startTime),
+                  width: `${((seg.endTime - seg.startTime) / videoDuration) * 100}%`,
+                }}
+                onClick={() =>
+                  setSidebarPanel(isActive ? { type: 'clip' } : { type: 'zoom', segId: seg.id })
+                }
                 onPointerDown={(e) => {
                   setSidebarPanel({ type: 'zoom', segId: seg.id });
                   startSegDrag(e, seg, selectedClip.id, 'move');
@@ -218,47 +253,59 @@ export default function Timeline() {
               >
                 <div
                   className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize"
-                  onPointerDown={(e) => { e.stopPropagation(); startSegDrag(e, seg, selectedClip.id, 'left'); }}
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                    startSegDrag(e, seg, selectedClip.id, 'left');
+                  }}
                 />
-                <span className="absolute inset-0 flex items-center justify-center font-mono text-[9px] text-blue-200 pointer-events-none">
+                <span className="absolute inset-0 flex items-center justify-center font-mono text-[9px] text-primary/80 pointer-events-none font-medium">
                   {seg.scale}x
                 </span>
                 {seg.panKeyframes.map((kf) => (
                   <div
                     key={kf.id}
-                    className="absolute top-1 bottom-1 w-px bg-blue-300/60 pointer-events-none"
-                    style={{ left: `${((kf.time - seg.startTime) / (seg.endTime - seg.startTime)) * 100}%` }}
+                    className="absolute top-1 bottom-1 w-px bg-primary/50 pointer-events-none"
+                    style={{
+                      left: `${((kf.time - seg.startTime) / (seg.endTime - seg.startTime)) * 100}%`,
+                    }}
                   />
                 ))}
                 <div
                   className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize"
-                  onPointerDown={(e) => { e.stopPropagation(); startSegDrag(e, seg, selectedClip.id, 'right'); }}
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                    startSegDrag(e, seg, selectedClip.id, 'right');
+                  }}
                 />
               </div>
             );
           })}
 
-          {!videoDuration && <div className="absolute inset-3 border border-dashed border-border rounded-lg" />}
+          {!videoDuration && (
+            <div className="absolute inset-3 border border-dashed border-border/40 rounded" />
+          )}
         </div>
 
         {/* Playhead */}
         {videoDuration > 0 && (
           <div
-            className="absolute top-0 bottom-0 w-px bg-foreground z-20 pointer-events-none"
+            className="absolute top-0 bottom-0 w-px bg-foreground/70 z-20 pointer-events-none"
             style={{ left: `${playheadPct}%` }}
           >
-            <div className="w-2 h-2 rounded-full bg-foreground absolute top-0.5 -translate-x-[3px]" />
+            <div className="w-2 h-2 rounded-full bg-foreground/70 absolute top-0.5 -translate-x-[3px]" />
           </div>
         )}
       </div>
 
       {/* Status bar */}
-      <div className="h-6 border-t border-border flex items-center px-4 gap-4 shrink-0 bg-background">
-        <span className="font-mono text-xs text-muted-foreground">
-          {clips.length} clip{clips.length !== 1 ? 's' : ''}
+      <div className="h-6 border-t border-border flex items-center px-3 gap-4 shrink-0">
+        <span className="font-mono text-[10px] text-muted-foreground/60">
+          {clips.length}&nbsp;clip{clips.length !== 1 ? 's' : ''}
         </span>
         {videoDuration > 0 && (
-          <span className="font-mono text-xs text-muted-foreground">{formatTime(videoDuration)}</span>
+          <span className="font-mono text-[10px] text-muted-foreground/60 tabular-nums">
+            {formatTime(videoDuration)}
+          </span>
         )}
       </div>
     </div>

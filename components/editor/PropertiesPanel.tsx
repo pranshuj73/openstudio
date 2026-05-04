@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
-import { ImageIcon, Plus, X, ChevronLeft } from 'lucide-react';
+import { ImageIcon, Plus, X, ChevronLeft, PanelRightClose } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
@@ -33,14 +33,41 @@ function bgMatch(a: Background, b: Background) {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-2.5 font-mono">
+    <p className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-widest mb-2.5 font-mono">
       {children}
     </p>
   );
 }
 
+// ─── Panel header ──────────────────────────────────────────────────────────
+function PanelHeader({ children, onCollapse }: { children: React.ReactNode; onCollapse?: () => void }) {
+  return (
+    <div className="h-10 border-b border-border flex items-center px-3 gap-2 shrink-0">
+      <span className="flex-1 text-xs font-mono font-medium text-muted-foreground">{children}</span>
+      {onCollapse && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="w-6 h-6 -mr-0.5 opacity-50 hover:opacity-100"
+          onClick={onCollapse}
+        >
+          <PanelRightClose className="w-3.5 h-3.5" />
+        </Button>
+      )}
+    </div>
+  );
+}
+
 // ─── Zoom panel ────────────────────────────────────────────────────────────
-function ZoomPanel({ clipId, segId }: { clipId: string; segId: string }) {
+function ZoomPanel({
+  clipId,
+  segId,
+  onCollapse,
+}: {
+  clipId: string;
+  segId: string;
+  onCollapse?: () => void;
+}) {
   const clips = useEditorStore((s) => s.clips);
   const currentTime = useEditorStore((s) => s.currentTime);
   const setSidebarPanel = useEditorStore((s) => s.setSidebarPanel);
@@ -62,7 +89,7 @@ function ZoomPanel({ clipId, segId }: { clipId: string; segId: string }) {
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="h-11 border-b border-border flex items-center px-3 gap-2 shrink-0">
+      <div className="h-10 border-b border-border flex items-center px-3 gap-2 shrink-0">
         <button
           onClick={() => setSidebarPanel({ type: 'clip' })}
           className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors font-mono"
@@ -70,11 +97,21 @@ function ZoomPanel({ clipId, segId }: { clipId: string; segId: string }) {
           <ChevronLeft className="w-3.5 h-3.5" />
           clip
         </button>
-        <span className="text-muted-foreground">·</span>
-        <span className="text-sm font-medium font-mono">zoom</span>
-        <span className="ml-auto text-xs text-muted-foreground font-mono">
-          {formatTime(seg.startTime)} → {formatTime(seg.endTime)}
+        <span className="text-muted-foreground/40 text-xs">/</span>
+        <span className="text-xs font-medium font-mono">zoom</span>
+        <span className="ml-auto text-[10px] text-muted-foreground font-mono tabular-nums">
+          {formatTime(seg.startTime)}–{formatTime(seg.endTime)}
         </span>
+        {onCollapse && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="w-6 h-6 -mr-0.5 opacity-50 hover:opacity-100 shrink-0"
+            onClick={onCollapse}
+          >
+            <PanelRightClose className="w-3.5 h-3.5" />
+          </Button>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto">
@@ -82,13 +119,13 @@ function ZoomPanel({ clipId, segId }: { clipId: string; segId: string }) {
 
           <div>
             <SectionLabel>scale</SectionLabel>
-            <div className="flex gap-1.5 flex-wrap mb-3">
+            <div className="grid grid-cols-4 gap-1.5 mb-3">
               {SCALE_PRESETS.map((s) => (
                 <Button
                   key={s}
                   variant={seg.scale === s ? 'default' : 'outline'}
                   size="sm"
-                  className="font-mono flex-1"
+                  className="font-mono text-xs"
                   onClick={() => updateZoomSegment(clipId, segId, { scale: s })}
                 >
                   {s}x
@@ -102,7 +139,7 @@ function ZoomPanel({ clipId, segId }: { clipId: string; segId: string }) {
                 onValueChange={([v]) => updateZoomSegment(clipId, segId, { scale: +v.toFixed(1) })}
                 className="flex-1"
               />
-              <span className="text-sm text-muted-foreground w-10 text-right shrink-0 font-mono">
+              <span className="text-xs text-muted-foreground w-9 text-right shrink-0 font-mono tabular-nums">
                 {seg.scale.toFixed(1)}x
               </span>
             </div>
@@ -115,8 +152,13 @@ function ZoomPanel({ clipId, segId }: { clipId: string; segId: string }) {
             <Button
               variant="outline"
               size="sm"
-              className="w-full font-mono"
-              onClick={() => updateZoomSegment(clipId, segId, { startTime: clip.sourceStart, endTime: clip.sourceEnd })}
+              className="w-full font-mono text-xs"
+              onClick={() =>
+                updateZoomSegment(clipId, segId, {
+                  startTime: clip.sourceStart,
+                  endTime: clip.sourceEnd,
+                })
+              }
             >
               throughout clip
             </Button>
@@ -129,7 +171,7 @@ function ZoomPanel({ clipId, segId }: { clipId: string; segId: string }) {
             <Button
               variant="outline"
               size="sm"
-              className="w-full gap-1.5 mb-3 font-mono"
+              className="w-full gap-1.5 mb-3 font-mono text-xs"
               disabled={!inSeg}
               onClick={() => addPanKeyframe(clipId, segId, { time: currentTime })}
             >
@@ -138,39 +180,43 @@ function ZoomPanel({ clipId, segId }: { clipId: string; segId: string }) {
             </Button>
 
             {seg.panKeyframes.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-3 font-mono">
+              <p className="text-xs text-muted-foreground text-center py-3 font-mono">
                 add keyframes to pan while zoomed
               </p>
             ) : (
               <div className="space-y-2">
                 {seg.panKeyframes.map((kf) => (
-                  <div key={kf.id} className="bg-muted rounded-lg px-3 py-2.5 space-y-2.5">
+                  <div key={kf.id} className="bg-muted/60 rounded-lg px-3 py-2.5 space-y-2.5 border border-border">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground font-mono">
+                      <span className="text-xs text-muted-foreground font-mono tabular-nums">
                         {formatTime(kf.time)}
                       </span>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="w-6 h-6"
+                        className="w-5 h-5"
                         onClick={() => removePanKeyframe(clipId, segId, kf.id)}
                       >
-                        <X className="w-3.5 h-3.5" />
+                        <X className="w-3 h-3" />
                       </Button>
                     </div>
                     <div>
-                      <Label className="text-xs text-muted-foreground mb-1.5 block font-mono">
+                      <Label className="text-[10px] text-muted-foreground mb-1.5 block font-mono">
                         x — {kf.x.toFixed(2)}
                       </Label>
-                      <Slider min={0} max={1} step={0.01} value={[kf.x]}
-                        onValueChange={([v]) => updatePanKeyframe(clipId, segId, kf.id, { x: v })} />
+                      <Slider
+                        min={0} max={1} step={0.01} value={[kf.x]}
+                        onValueChange={([v]) => updatePanKeyframe(clipId, segId, kf.id, { x: v })}
+                      />
                     </div>
                     <div>
-                      <Label className="text-xs text-muted-foreground mb-1.5 block font-mono">
+                      <Label className="text-[10px] text-muted-foreground mb-1.5 block font-mono">
                         y — {kf.y.toFixed(2)}
                       </Label>
-                      <Slider min={0} max={1} step={0.01} value={[kf.y]}
-                        onValueChange={([v]) => updatePanKeyframe(clipId, segId, kf.id, { y: v })} />
+                      <Slider
+                        min={0} max={1} step={0.01} value={[kf.y]}
+                        onValueChange={([v]) => updatePanKeyframe(clipId, segId, kf.id, { y: v })}
+                      />
                     </div>
                   </div>
                 ))}
@@ -183,8 +229,11 @@ function ZoomPanel({ clipId, segId }: { clipId: string; segId: string }) {
           <Button
             variant="destructive"
             size="sm"
-            className="w-full font-mono"
-            onClick={() => { removeZoomSegment(clipId, segId); setSidebarPanel({ type: 'clip' }); }}
+            className="w-full font-mono text-xs"
+            onClick={() => {
+              removeZoomSegment(clipId, segId);
+              setSidebarPanel({ type: 'clip' });
+            }}
           >
             delete zoom region
           </Button>
@@ -195,7 +244,7 @@ function ZoomPanel({ clipId, segId }: { clipId: string; segId: string }) {
 }
 
 // ─── Clip panel ────────────────────────────────────────────────────────────
-function ClipPanel({ clipId }: { clipId: string }) {
+function ClipPanel({ clipId, onCollapse }: { clipId: string; onCollapse?: () => void }) {
   const clips = useEditorStore((s) => s.clips);
   const updateClip = useEditorStore((s) => s.updateClip);
   const bgImageInputRef = useRef<HTMLInputElement>(null);
@@ -206,151 +255,234 @@ function ClipPanel({ clipId }: { clipId: string }) {
   const handleBgImageUpload = (file: File) => {
     const reader = new FileReader();
     reader.onload = (e) => {
-      updateClip(clip.id, { background: { type: 'image', color: '#000000', imageUrl: e.target?.result as string } });
+      updateClip(clip.id, {
+        background: { type: 'image', color: '#000000', imageUrl: e.target?.result as string },
+      });
     };
     reader.readAsDataURL(file);
   };
 
   return (
-    <div className="p-4 space-y-5">
+    <div className="flex flex-col h-full overflow-hidden">
+      <PanelHeader onCollapse={onCollapse}>clip</PanelHeader>
 
-      <div>
-        <SectionLabel>background</SectionLabel>
-        <div className="flex gap-1.5 flex-wrap mb-3">
-          {BG_PRESETS.map((preset, i) => {
-            const active = bgMatch(clip.background, preset);
-            return (
-              <button
-                key={i}
-                className={`w-7 h-7 rounded-md shrink-0 transition-all border ${
-                  active ? 'border-primary ring-2 ring-primary/30' : 'border-border hover:border-foreground/50'
-                }`}
-                style={
-                  preset.type === 'gradient'
-                    ? { background: `linear-gradient(135deg, ${preset.color}, ${preset.gradientTo})` }
-                    : { background: preset.color }
-                }
-                onClick={() => updateClip(clip.id, { background: preset })}
-              />
-            );
-          })}
+      <div className="flex-1 overflow-y-auto p-4 space-y-5">
+
+        {/* Background */}
+        <div>
+          <SectionLabel>background</SectionLabel>
+          <div className="grid grid-cols-5 gap-1.5 mb-2.5">
+            {BG_PRESETS.map((preset, i) => {
+              const active = bgMatch(clip.background, preset);
+              return (
+                <button
+                  key={i}
+                  className={`h-8 rounded-md shrink-0 transition-all border-2 ${
+                    active
+                      ? 'border-primary ring-2 ring-primary/25'
+                      : 'border-transparent hover:border-foreground/20'
+                  }`}
+                  style={
+                    preset.type === 'gradient'
+                      ? { background: `linear-gradient(135deg, ${preset.color}, ${preset.gradientTo})` }
+                      : { background: preset.color }
+                  }
+                  onClick={() => updateClip(clip.id, { background: preset })}
+                />
+              );
+            })}
+            <input
+              type="color"
+              value={clip.background.color}
+              onChange={(e) =>
+                updateClip(clip.id, { background: { type: 'color', color: e.target.value } })
+              }
+              className="h-8 rounded-md border-2 border-transparent cursor-pointer bg-transparent p-0.5 hover:border-foreground/20"
+              title="custom color"
+            />
+          </div>
+
           <input
-            type="color"
-            value={clip.background.color}
-            onChange={(e) => updateClip(clip.id, { background: { type: 'color', color: e.target.value } })}
-            className="w-7 h-7 rounded-md border border-border cursor-pointer bg-transparent p-0.5"
-            title="custom color"
+            ref={bgImageInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleBgImageUpload(f);
+              e.target.value = '';
+            }}
           />
-        </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full gap-1.5 font-mono text-xs mb-2"
+            onClick={() => bgImageInputRef.current?.click()}
+          >
+            <ImageIcon className="w-3.5 h-3.5" />
+            {clip.background.type === 'image' ? 'change image' : 'use image'}
+          </Button>
 
-        <input ref={bgImageInputRef} type="file" accept="image/*" className="hidden"
-          onChange={(e) => { const f = e.target.files?.[0]; if (f) handleBgImageUpload(f); e.target.value = ''; }} />
-        <Button variant="outline" size="sm" className="w-full gap-1.5 font-mono mb-2"
-          onClick={() => bgImageInputRef.current?.click()}>
-          <ImageIcon className="w-3.5 h-3.5" />
-          {clip.background.type === 'image' ? 'change image' : 'use image'}
-        </Button>
-
-        {clip.background.type === 'image' && clip.background.imageUrl && (
-          <div className="relative rounded-md overflow-hidden" style={{ height: 60 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={clip.background.imageUrl} alt="background" className="w-full h-full object-cover" />
-            <Button variant="secondary" size="sm"
-              className="absolute top-1.5 right-1.5 h-6 text-xs font-mono"
-              onClick={() => updateClip(clip.id, { background: { type: 'color', color: '#111111' } })}>
-              remove
-            </Button>
-          </div>
-        )}
-
-        {clip.background.type === 'gradient' && (
-          <div className="flex gap-2 mt-2">
-            <div className="flex-1">
-              <Label className="text-xs text-muted-foreground mb-1 block font-mono">from</Label>
-              <input type="color" value={clip.background.color}
-                onChange={(e) => updateClip(clip.id, { background: { ...clip.background, color: e.target.value } })}
-                className="w-full h-8 rounded-md border border-border cursor-pointer block bg-transparent p-0.5" />
+          {clip.background.type === 'image' && clip.background.imageUrl && (
+            <div className="relative rounded-md overflow-hidden border border-border" style={{ height: 56 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={clip.background.imageUrl}
+                alt="background"
+                className="w-full h-full object-cover"
+              />
+              <Button
+                variant="secondary"
+                size="sm"
+                className="absolute top-1.5 right-1.5 h-5 text-[10px] font-mono px-2"
+                onClick={() =>
+                  updateClip(clip.id, { background: { type: 'color', color: '#111111' } })
+                }
+              >
+                remove
+              </Button>
             </div>
-            <div className="flex-1">
-              <Label className="text-xs text-muted-foreground mb-1 block font-mono">to</Label>
-              <input type="color" value={clip.background.gradientTo ?? '#000000'}
-                onChange={(e) => updateClip(clip.id, { background: { ...clip.background, gradientTo: e.target.value } })}
-                className="w-full h-8 rounded-md border border-border cursor-pointer block bg-transparent p-0.5" />
+          )}
+
+          {clip.background.type === 'gradient' && (
+            <div className="flex gap-2 mt-2">
+              <div className="flex-1">
+                <Label className="text-[10px] text-muted-foreground mb-1 block font-mono">from</Label>
+                <input
+                  type="color"
+                  value={clip.background.color}
+                  onChange={(e) =>
+                    updateClip(clip.id, { background: { ...clip.background, color: e.target.value } })
+                  }
+                  className="w-full h-8 rounded-md border border-border cursor-pointer block bg-transparent p-0.5"
+                />
+              </div>
+              <div className="flex-1">
+                <Label className="text-[10px] text-muted-foreground mb-1 block font-mono">to</Label>
+                <input
+                  type="color"
+                  value={clip.background.gradientTo ?? '#000000'}
+                  onChange={(e) =>
+                    updateClip(clip.id, {
+                      background: { ...clip.background, gradientTo: e.target.value },
+                    })
+                  }
+                  className="w-full h-8 rounded-md border border-border cursor-pointer block bg-transparent p-0.5"
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        <Separator />
+
+        {/* Padding */}
+        <div>
+          <SectionLabel>padding</SectionLabel>
+          <div className="flex items-center gap-3">
+            <Slider
+              min={0}
+              max={20}
+              step={0.5}
+              value={[clip.padding]}
+              onValueChange={([v]) => updateClip(clip.id, { padding: v })}
+              className="flex-1"
+            />
+            <span className="text-xs text-muted-foreground w-9 text-right shrink-0 font-mono tabular-nums">
+              {clip.padding}%
+            </span>
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* Frame */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <SectionLabel>frame</SectionLabel>
+            <Switch
+              checked={clip.frame.enabled}
+              onCheckedChange={(v) => updateClip(clip.id, { frame: { ...clip.frame, enabled: v } })}
+            />
+          </div>
+          <div className={`space-y-3.5 ${clip.frame.enabled ? '' : 'opacity-40 pointer-events-none'}`}>
+            <div>
+              <Label className="text-[10px] text-muted-foreground mb-1.5 block font-mono">color</Label>
+              <input
+                type="color"
+                value={clip.frame.color}
+                onChange={(e) =>
+                  updateClip(clip.id, { frame: { ...clip.frame, color: e.target.value } })
+                }
+                className="w-full h-8 rounded-md border border-border cursor-pointer block bg-transparent p-0.5"
+              />
+            </div>
+            <div>
+              <Label className="text-[10px] text-muted-foreground mb-1.5 block font-mono">
+                opacity — {Math.round((clip.frame.opacity ?? 1) * 100)}%
+              </Label>
+              <Slider
+                min={0}
+                max={1}
+                step={0.05}
+                value={[clip.frame.opacity ?? 1]}
+                onValueChange={([v]) => updateClip(clip.id, { frame: { ...clip.frame, opacity: v } })}
+              />
+            </div>
+            <div>
+              <Label className="text-[10px] text-muted-foreground mb-1.5 block font-mono">
+                thickness — {clip.frame.width}px
+              </Label>
+              <Slider
+                min={1}
+                max={24}
+                step={1}
+                value={[clip.frame.width]}
+                onValueChange={([v]) => updateClip(clip.id, { frame: { ...clip.frame, width: v } })}
+              />
+            </div>
+            <div>
+              <Label className="text-[10px] text-muted-foreground mb-1.5 block font-mono">
+                radius — {clip.frame.radius ?? 0}px
+              </Label>
+              <Slider
+                min={0}
+                max={80}
+                step={1}
+                value={[clip.frame.radius ?? 0]}
+                onValueChange={([v]) => updateClip(clip.id, { frame: { ...clip.frame, radius: v } })}
+              />
             </div>
           </div>
-        )}
-      </div>
-
-      <Separator />
-
-      <div>
-        <SectionLabel>padding</SectionLabel>
-        <div className="flex items-center gap-3">
-          <Slider min={0} max={20} step={0.5} value={[clip.padding]}
-            onValueChange={([v]) => updateClip(clip.id, { padding: v })} className="flex-1" />
-          <span className="text-sm text-muted-foreground w-10 text-right shrink-0 font-mono">{clip.padding}%</span>
         </div>
-      </div>
 
-      <Separator />
+        <Separator />
 
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <SectionLabel>frame</SectionLabel>
-          <Switch checked={clip.frame.enabled}
-            onCheckedChange={(v) => updateClip(clip.id, { frame: { ...clip.frame, enabled: v } })} />
-        </div>
-        <div className={`space-y-3 ${clip.frame.enabled ? '' : 'opacity-50 pointer-events-none'}`}>
-          <div>
-            <Label className="text-xs text-muted-foreground mb-1.5 block font-mono">color</Label>
-            <input type="color" value={clip.frame.color}
-              onChange={(e) => updateClip(clip.id, { frame: { ...clip.frame, color: e.target.value } })}
-              className="w-full h-8 rounded-md border border-border cursor-pointer block bg-transparent p-0.5" />
-          </div>
-          <div>
-            <Label className="text-xs text-muted-foreground mb-1.5 block font-mono">
-              opacity — {Math.round((clip.frame.opacity ?? 1) * 100)}%
-            </Label>
-            <Slider min={0} max={1} step={0.05} value={[clip.frame.opacity ?? 1]}
-              onValueChange={([v]) => updateClip(clip.id, { frame: { ...clip.frame, opacity: v } })} />
-          </div>
-          <div>
-            <Label className="text-xs text-muted-foreground mb-1.5 block font-mono">
-              thickness — {clip.frame.width}px
-            </Label>
-            <Slider min={1} max={24} step={1} value={[clip.frame.width]}
-              onValueChange={([v]) => updateClip(clip.id, { frame: { ...clip.frame, width: v } })} />
-          </div>
-          <div>
-            <Label className="text-xs text-muted-foreground mb-1.5 block font-mono">
-              radius — {clip.frame.radius ?? 0}px
-            </Label>
-            <Slider min={0} max={80} step={1} value={[clip.frame.radius ?? 0]}
-              onValueChange={([v]) => updateClip(clip.id, { frame: { ...clip.frame, radius: v } })} />
+        {/* Speed */}
+        <div>
+          <SectionLabel>speed</SectionLabel>
+          <div className="grid grid-cols-3 gap-1.5">
+            {SPEED_OPTIONS.map((s) => (
+              <Button
+                key={s}
+                variant={clip.speed === s ? 'default' : 'outline'}
+                size="sm"
+                className="font-mono text-xs"
+                onClick={() => updateClip(clip.id, { speed: s })}
+              >
+                {s}x
+              </Button>
+            ))}
           </div>
         </div>
-      </div>
 
-      <Separator />
-
-      <div>
-        <SectionLabel>speed</SectionLabel>
-        <div className="flex gap-1.5 flex-wrap">
-          {SPEED_OPTIONS.map((s) => (
-            <Button key={s} variant={clip.speed === s ? 'default' : 'outline'} size="sm"
-              className="font-mono flex-1"
-              onClick={() => updateClip(clip.id, { speed: s })}>
-              {s}x
-            </Button>
-          ))}
-        </div>
       </div>
     </div>
   );
 }
 
 // ─── Root panel router ─────────────────────────────────────────────────────
-export default function PropertiesPanel() {
+export default function PropertiesPanel({ onCollapse }: { onCollapse?: () => void }) {
   const clips = useEditorStore((s) => s.clips);
   const selectedClipId = useEditorStore((s) => s.selectedClipId);
   const sidebarPanel = useEditorStore((s) => s.sidebarPanel);
@@ -358,19 +490,18 @@ export default function PropertiesPanel() {
 
   if (!clip) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <p className="text-sm text-muted-foreground font-mono">no clip selected</p>
+      <div className="flex flex-col h-full overflow-hidden">
+        <PanelHeader>properties</PanelHeader>
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-xs text-muted-foreground font-mono">no clip selected</p>
+        </div>
       </div>
     );
   }
 
   if (sidebarPanel.type === 'zoom') {
-    return <ZoomPanel clipId={clip.id} segId={sidebarPanel.segId} />;
+    return <ZoomPanel clipId={clip.id} segId={sidebarPanel.segId} onCollapse={onCollapse} />;
   }
 
-  return (
-    <div className="overflow-y-auto h-full">
-      <ClipPanel clipId={clip.id} />
-    </div>
-  );
+  return <ClipPanel clipId={clip.id} onCollapse={onCollapse} />;
 }

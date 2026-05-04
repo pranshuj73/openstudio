@@ -1,0 +1,11 @@
+{
+  "agents": [
+    "claude-code"
+  ],
+  "scope": "project",
+  "skills": {
+    "web-design-guidelines": "vercel-labs/agent-skills",
+    "frontend-design": "anthropics/skills",
+    "vercel-react-best-practices": "vercel-labs/agent-skills"
+  }
+}
