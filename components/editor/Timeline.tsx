@@ -114,7 +114,7 @@ export default function Timeline() {
   const playheadPct = videoDuration ? (currentTime / videoDuration) * 100 : 0;
 
   return (
-    <div className="bg-card border-t border-border shrink-0 flex flex-col select-none" style={{ height: 240 }}>
+    <div className="flex flex-col select-none h-full">
 
       {/* Tool panel */}
       <div className="h-11 border-b border-border flex items-center px-3 gap-1.5 shrink-0">
@@ -149,7 +149,7 @@ export default function Timeline() {
       {/* Scrub area */}
       <div
         ref={trackRef}
-        className="relative flex-1 cursor-col-resize overflow-hidden"
+        className="relative flex-1 cursor-col-resize overflow-hidden flex flex-col"
         onPointerDown={(e) => {
           if (dragRef.current.type === 'none') {
             isScrubbing.current = true;
@@ -172,7 +172,7 @@ export default function Timeline() {
         </div>
 
         {/* Clip track */}
-        <div className="relative" style={{ height: 88 }}>
+        <div className="relative flex-1">
           {clips.map((clip, i) => {
             if (!videoDuration) return null;
             const selected = clip.id === selectedClipId;

@@ -16,7 +16,7 @@ export default function Toolbar() {
   const videoUrl = useEditorStore((s) => s.videoUrl);
 
   return (
-    <div className="h-12 bg-card border-b border-border flex items-center justify-between px-4 shrink-0">
+    <div className="h-12 flex items-center justify-between px-4 shrink-0">
       <span className="font-mono text-sm font-semibold tracking-tight select-none">
         openstudio
       </span>
