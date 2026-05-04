@@ -343,57 +343,54 @@ function ClipPanel({ clipId }: { clipId: string }) {
 
       {/* Frame */}
       <div>
-        <SectionLabel>frame</SectionLabel>
         <div className="flex items-center justify-between mb-3">
-          <Label className="font-mono text-xs">enabled</Label>
+          <p className="font-mono text-[10px] text-muted-foreground/60 uppercase tracking-widest">frame</p>
           <Switch
             checked={clip.frame.enabled}
             onCheckedChange={(v) => updateClip(clip.id, { frame: { ...clip.frame, enabled: v } })}
           />
         </div>
-        {clip.frame.enabled && (
-          <div className="space-y-3">
-            <div>
-              <Label className="font-mono text-[10px] text-muted-foreground mb-1.5 block">color</Label>
-              <input
-                type="color"
-                value={clip.frame.color}
-                onChange={(e) => updateClip(clip.id, { frame: { ...clip.frame, color: e.target.value } })}
-                className="w-full h-8 p-0 border border-border cursor-pointer block"
-              />
-            </div>
-            <div>
-              <Label className="font-mono text-[10px] text-muted-foreground mb-1.5 block">
-                opacity&nbsp;&nbsp;<span className="text-foreground">{Math.round((clip.frame.opacity ?? 1) * 100)}%</span>
-              </Label>
-              <Slider
-                min={0} max={1} step={0.05}
-                value={[clip.frame.opacity ?? 1]}
-                onValueChange={([v]) => updateClip(clip.id, { frame: { ...clip.frame, opacity: v } })}
-              />
-            </div>
-            <div>
-              <Label className="font-mono text-[10px] text-muted-foreground mb-1.5 block">
-                thickness&nbsp;&nbsp;<span className="text-foreground">{clip.frame.width}px</span>
-              </Label>
-              <Slider
-                min={1} max={24} step={1}
-                value={[clip.frame.width]}
-                onValueChange={([v]) => updateClip(clip.id, { frame: { ...clip.frame, width: v } })}
-              />
-            </div>
-            <div>
-              <Label className="font-mono text-[10px] text-muted-foreground mb-1.5 block">
-                radius&nbsp;&nbsp;<span className="text-foreground">{clip.frame.radius ?? 0}px</span>
-              </Label>
-              <Slider
-                min={0} max={80} step={1}
-                value={[clip.frame.radius ?? 0]}
-                onValueChange={([v]) => updateClip(clip.id, { frame: { ...clip.frame, radius: v } })}
-              />
-            </div>
+        <div className={`space-y-3 ${clip.frame.enabled ? '' : 'opacity-40 pointer-events-none'}`}>
+          <div>
+            <Label className="font-mono text-[10px] text-muted-foreground mb-1.5 block">color</Label>
+            <input
+              type="color"
+              value={clip.frame.color}
+              onChange={(e) => updateClip(clip.id, { frame: { ...clip.frame, color: e.target.value } })}
+              className="w-full h-8 p-0 border border-border cursor-pointer block"
+            />
           </div>
-        )}
+          <div>
+            <Label className="font-mono text-[10px] text-muted-foreground mb-1.5 block">
+              opacity&nbsp;&nbsp;<span className="text-foreground">{Math.round((clip.frame.opacity ?? 1) * 100)}%</span>
+            </Label>
+            <Slider
+              min={0} max={1} step={0.05}
+              value={[clip.frame.opacity ?? 1]}
+              onValueChange={([v]) => updateClip(clip.id, { frame: { ...clip.frame, opacity: v } })}
+            />
+          </div>
+          <div>
+            <Label className="font-mono text-[10px] text-muted-foreground mb-1.5 block">
+              thickness&nbsp;&nbsp;<span className="text-foreground">{clip.frame.width}px</span>
+            </Label>
+            <Slider
+              min={1} max={24} step={1}
+              value={[clip.frame.width]}
+              onValueChange={([v]) => updateClip(clip.id, { frame: { ...clip.frame, width: v } })}
+            />
+          </div>
+          <div>
+            <Label className="font-mono text-[10px] text-muted-foreground mb-1.5 block">
+              radius&nbsp;&nbsp;<span className="text-foreground">{clip.frame.radius ?? 0}px</span>
+            </Label>
+            <Slider
+              min={0} max={80} step={1}
+              value={[clip.frame.radius ?? 0]}
+              onValueChange={([v]) => updateClip(clip.id, { frame: { ...clip.frame, radius: v } })}
+            />
+          </div>
+        </div>
       </div>
 
       <Separator />
