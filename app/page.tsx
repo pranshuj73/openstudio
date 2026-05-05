@@ -17,8 +17,8 @@ export default function Home() {
       <section className="relative flex min-h-screen items-center justify-center px-6">
         <div className="mx-auto flex max-w-5xl flex-col items-center text-center">
           <div className="mb-7 flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md border border-violet-400/20 bg-gradient-to-br from-violet-500/18 to-indigo-500/8 shadow-[0_0_20px_rgba(139,92,246,0.12)]">
-              <div className="h-2.5 w-2.5 rounded-[0.25rem] bg-gradient-to-br from-violet-300 to-indigo-400" />
+            <div className="flex h-7 w-7 items-center justify-center rounded-md border border-violet-400/20 bg-linear-to-br from-violet-500/18 to-indigo-500/8 shadow-[0_0_20px_rgba(139,92,246,0.12)]">
+              <div className="h-2.5 w-2.5 rounded-lg bg-linear-to-br from-violet-300 to-indigo-400" />
             </div>
             <p className="font-mono text-sm font-semibold tracking-tight text-foreground">
               openstudio
