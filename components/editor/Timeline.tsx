@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useRef } from 'react';
-import { ZoomIn, Scissors } from 'lucide-react';
+import { ZoomIn, Scissors, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useEditorStore } from '@/store/editorStore';
 import { formatTime } from '@/lib/editorUtils';
@@ -196,11 +196,10 @@ export default function Timeline() {
             return (
               <div
                 key={clip.id}
-                className={`absolute top-2 bottom-2 rounded overflow-hidden border transition-colors ${
-                  selected
+                className={`absolute top-2 bottom-2 rounded overflow-hidden border transition-colors ${selected
                     ? 'border-primary/50 ring-1 ring-primary/20 ring-offset-0'
                     : 'border-border/60'
-                }`}
+                  }`}
                 style={{
                   left: pct(clip.sourceStart),
                   width: `${((clip.sourceEnd - clip.sourceStart) / videoDuration) * 100}%`,
@@ -234,11 +233,10 @@ export default function Timeline() {
             return (
               <div
                 key={seg.id}
-                className={`absolute top-1 bottom-1 z-10 cursor-grab active:cursor-grabbing overflow-hidden rounded transition-colors ${
-                  isActive
-                    ? 'bg-primary/25 border border-primary/60'
+                className={`absolute top-1 bottom-1 z-10 cursor-grab active:cursor-grabbing rounded transition-colors ${isActive
+                    ? 'bg-primary/25 border border-primary/50'
                     : 'bg-primary/10 border border-primary/25 hover:bg-primary/20'
-                }`}
+                  }`}
                 style={{
                   left: pct(seg.startTime),
                   width: `${((seg.endTime - seg.startTime) / videoDuration) * 100}%`,
@@ -252,12 +250,14 @@ export default function Timeline() {
                 }}
               >
                 <div
-                  className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize"
+                  className='absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 bg-primary rounded py-2 cursor-ew-resize'
                   onPointerDown={(e) => {
                     e.stopPropagation();
                     startSegDrag(e, seg, selectedClip.id, 'left');
                   }}
-                />
+                >
+                  <GripVertical size={12} />
+                </div>
                 <span className="absolute inset-0 flex items-center justify-center font-mono text-[9px] text-primary/80 pointer-events-none font-medium">
                   {seg.scale}x
                 </span>
@@ -271,12 +271,14 @@ export default function Timeline() {
                   />
                 ))}
                 <div
-                  className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize"
+                  className='absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 bg-primary rounded py-2 cursor-ew-resize'
                   onPointerDown={(e) => {
                     e.stopPropagation();
                     startSegDrag(e, seg, selectedClip.id, 'right');
                   }}
-                />
+                >
+                  <GripVertical size={12} />
+                </div>
               </div>
             );
           })}
@@ -292,7 +294,7 @@ export default function Timeline() {
             className="absolute top-0 bottom-0 w-px bg-primary/80 z-20 pointer-events-none"
             style={{ left: `${playheadPct}%` }}
           >
-            <div className="w-2 h-2 rounded-full bg-primary absolute top-0.5 -translate-x-[3px]" />
+            <div className="w-2 h-2 rounded-full bg-primary absolute top-0.5 -translate-x-0.75" />
           </div>
         )}
       </div>
